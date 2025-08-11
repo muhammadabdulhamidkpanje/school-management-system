@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11"
+  },
+  "dependencies": {
+    "express-jwt": "^8.5.1",
+    "moongoose": "^0.0.5"
+  }
+}
