@@ -7,10 +7,11 @@ const Input = ({
   placeholder,
   value,
   onChange,
+  register, // 👈 added support for RHF register
   className = "",
 }) => {
   return (
-    <div className={`flex flex-col ${className}`}>
+    <div className={`mb-2 flex flex-col ${className}`}>
       {label && (
         <label
           htmlFor={name}
@@ -25,12 +26,13 @@ const Input = ({
         type={type}
         placeholder={placeholder}
         value={value}
+        // 👇 Spread register only if provided
+        {...(register ? register(name) : {})}
         onChange={onChange}
         className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
       />
     </div>
   );
 };
-
 
 export default Input;

@@ -1,9 +1,5 @@
 import React from "react";
 
 export default function Headings({ children, className }) {
-  return (
-    <div className={`text-center text-2xl font-bold ${className}`}>
-      {children}
-    </div>
-  );
+  return <h1 className={`py-2 text-3xl text-blue-600 uppercase ${className}`}>{children}</h1>;
 }

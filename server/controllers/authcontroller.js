@@ -12,7 +12,7 @@ const generateToken = (user) => {
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
   try {
-    const userExists = await User.findOne({ email }); // ✅ FIX: findOne, not findone
+    const userExists = await User.findOne({ email }); 
     if (userExists) {
       return res
         .status(400)
@@ -38,14 +38,12 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email }); // ✅ FIX: findOne
+  const user = await User.findOne({ email });
   if (!user || !(await user.comparePassword(password))) {
-    // ✅ FIX: comparePassword
     return res
       .status(401)
       .json({ status: "fail", message: "Invalid email or password" });
   }
-
   const token = generateToken(user);
   return res.status(200).json({ status: "success", data: { user, token } });
 };

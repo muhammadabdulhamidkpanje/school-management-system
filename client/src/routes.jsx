@@ -6,6 +6,7 @@ import PagesLayout from "./layouts/pagesLayout/pageslayout";
 import Home from "./pages";
 import AuthPage from "./pages/auth";
 import Login from "./features/auth/logIn";
+import Admission from "./pages/admission";
 
 import StudentDashboardLayout from "./layouts/studentDashboard/studentDashboard";
 import StudentDashboard from "./pages/studentDashboard/index";
@@ -14,10 +15,15 @@ import AdminDashboardLayout from "./layouts/adminDashboard/adminDashboard";
 import AdminDashboard from "./pages/adminDashboard/index";
 import StaffManagement from "./pages/adminDashboard/staffmanagement/staffManagement";
 import StudentManagement from "./pages/adminDashboard/studentManagement/studentManagement";
+import CourseManagement from "./pages/adminDashboard/courseManagement/courseManagement";
+import TimeTableAndSchedules from "./pages/adminDashboard/timeTable and schedules/timeTableAndSchedules";
+import InstitutionSettings from "./pages/adminDashboard/Institution Settings/insInstitutionSettings";
 import AddStaff from "./features/addstaff/addStaff";
-import Admission from "./pages/admission";
+
+
 
 import LoadingSpinner from "./UI/spinner";
+import ContactUS from "./pages/contact";
 
 const AppRoutes = () => {
   return (
@@ -30,6 +36,7 @@ const AppRoutes = () => {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/login" element={<Login />} />
           <Route path="*" element={<h1>Page Not Found</h1>} />
+          <Route path="/contact-us" element={<ContactUS />} />
         </Route>
 
         {/* Student Dashboard */}
@@ -41,12 +48,24 @@ const AppRoutes = () => {
         <Route element={<AdminDashboardLayout />}>
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route
+            path="/admin-dashboard/timetable-and-schedules"
+            element={<TimeTableAndSchedules />}
+          />
+          <Route
+            path="/admin-dashboard/course-Management"
+            element={<CourseManagement />}
+          />
+          <Route
             path="/admin-dashboard/Staff-Management"
             element={<StaffManagement />}
           />
           <Route
             path="/admin-dashboard/Student-Management"
             element={<StudentManagement />}
+          />
+          <Route
+            path="/admin-dashboard/Institution-Settings"
+            element={<InstitutionSettings />}
           />
           <Route path="/admin-dashboard/addStaff" element={<AddStaff />} />
         </Route>

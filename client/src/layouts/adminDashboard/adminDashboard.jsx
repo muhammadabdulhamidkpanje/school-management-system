@@ -5,7 +5,7 @@ import Main from "../../UI/Main";
 import DashboardNav from "../../components/navBar/DashboardNav/dashboardnav";
 import Footer from "../../components/footer/footer";
 import SideNav from "../../components/navBar/DashboardNav/sideNav";
-import { Home, CalendarClock, Users, GraduationCap, Book, Settings } from "lucide-react";
+import { Home, CalendarClock, Users, GraduationCap, Book, Settings, BookMarked } from "lucide-react";
 
 
 
@@ -17,8 +17,13 @@ export default function AdminDashboard({ children }) {
       icon: <Home size={26} />,
     },
     {
-      path: "/Timetable-and-Schedule",
-      name: "Timetable and Schedule",
+      path: "/institution-settings",
+      name: "Institution Settings",
+      icon: <BookMarked size={26} />,
+    },
+    {
+      path: "/timetable-and-schedules",
+      name: "Timetable and Schedules",
       icon: <CalendarClock size={26} />,
     },
     {

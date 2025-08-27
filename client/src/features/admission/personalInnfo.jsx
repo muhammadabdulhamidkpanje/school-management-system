@@ -1,15 +1,15 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updatePersonalInfo } from "./admissionSlice"; // Adjust the import path as necessary
+import { updateAdmissionForm } from "./admissionSlice"; // Adjust the import path as necessary
 import Input from "../../components/inputs/input";
 
 export default function PersonalInfoForm() {
   const dispatch = useDispatch();
-  const personalInfo = useSelector((state) => state.admission.personalInfo);
+  const personalInfo = useSelector((state) => state.admission);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    dispatch(updatePersonalInfo({ [name]: value }));
+    dispatch(updateAdmissionForm({ [name]: value }));
   };
 
   return (
@@ -19,15 +19,15 @@ export default function PersonalInfoForm() {
         <input
           type="text"
           name="firstName"
-          value={personalInfo.firstName}
+          value={updateAdmissionForm.firstName}
           onChange={handleChange}
           placeholder="First Name"
-          className="rounded p-2 border"
+          className="rounded border p-2"
         />
         <input
           type="text"
           name="middleName"
-          value={personalInfo.middleName}
+          value={updateAdmissionForm.middleName}
           onChange={handleChange}
           placeholder="Middle Name"
           className="rounded border p-2"
@@ -35,21 +35,29 @@ export default function PersonalInfoForm() {
         <input
           type="text"
           name="lastName"
-          value={personalInfo.lastName}
+          value={updateAdmissionForm.lastName}
           onChange={handleChange}
           placeholder="Last Name"
           className="rounded border p-2"
         />
         <input
+          type="mail"
+          name="email"
+          value={updateAdmissionForm.email}
+          onChange={handleChange}
+          placeholder="E-mail"
+          className="rounded border p-2"
+        />
+        <input
           type="date"
           name="dateOfBirth"
-          value={personalInfo.dateOfBirth}
+          value={updateAdmissionForm.dateOfBirth}
           onChange={handleChange}
           className="rounded border p-2"
         />
         <select
           name="gender"
-          value={personalInfo.gender}
+          value={updateAdmissionForm.gender}
           onChange={handleChange}
           className="rounded border p-2"
         >
@@ -61,7 +69,7 @@ export default function PersonalInfoForm() {
         <input
           type="text"
           name="nationality"
-          value={personalInfo.nationality}
+          value={updateAdmissionForm.nationality}
           onChange={handleChange}
           placeholder="Nationality"
           className="rounded border p-2"
@@ -69,7 +77,7 @@ export default function PersonalInfoForm() {
         <input
           type="text"
           name="stateOfOrigin"
-          value={personalInfo.stateOfOrigin}
+          value={updateAdmissionForm.stateOfOrigin}
           onChange={handleChange}
           placeholder="State of Origin"
           className="rounded border p-2"
@@ -77,7 +85,7 @@ export default function PersonalInfoForm() {
         <input
           type="text"
           name="lga"
-          value={personalInfo.lga}
+          value={updateAdmissionForm.lga}
           onChange={handleChange}
           placeholder="Local Government Area (LGA)"
           className="rounded border p-2"
@@ -85,7 +93,7 @@ export default function PersonalInfoForm() {
         <input
           type="text"
           name="religion"
-          value={personalInfo.religion}
+          value={updateAdmissionForm.religion}
           onChange={handleChange}
           placeholder="Religion"
           className="rounded border p-2"

@@ -1,20 +1,21 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  updateResults,
+  updateAdmissionForm,
   addExtraCourse,
   updateExtraCourse,
-} from "./admissionSlice"; // Adjust the import path as necessary
+} from "./admissionSlice"; 
 
 export default function ResultsSection() {
   const dispatch = useDispatch();
   const { regNumber, english, math, extraCourses } = useSelector(
-    (state) => state.admission.results
+    (state) => state.admission
   );
+  // console.log(regNumber)
 
   const handleBasicChange = (e) => {
     const { name, value } = e.target;
-    dispatch(updateResults({ [name]: value }));
+    dispatch(updateAdmissionForm({ [name]: value }));
   };
 
   const handleExtraCourseChange = (index, field, value) => {
@@ -32,7 +33,7 @@ export default function ResultsSection() {
         <input
           type="text"
           name="regNumber"
-          value={regNumber}
+          value={updateAdmissionForm.regNumber}
           onChange={handleBasicChange}
           placeholder="Registration Number"
           className="rounded border p-2"
@@ -40,7 +41,7 @@ export default function ResultsSection() {
         <input
           type="text"
           name="english"
-          value={english}
+          value={updateAdmissionForm.english}
           onChange={handleBasicChange}
           placeholder="English Grade"
           className="rounded border p-2"
@@ -48,7 +49,7 @@ export default function ResultsSection() {
         <input
           type="text"
           name="math"
-          value={math}
+          value={updateAdmissionForm.math}
           onChange={handleBasicChange}
           placeholder="Mathematics Grade"
           className="rounded border p-2"

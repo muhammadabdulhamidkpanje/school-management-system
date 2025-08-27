@@ -16,36 +16,20 @@ export default function Filter({
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setVisible(false), 30000);
   };
-
-  // Filter data and send to parent
-  useEffect(() => {
+  
     const filteredData = data.filter((item) =>
       String(item[filterKey] || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
-    onFilter(filteredData);
-  }, [searchTerm, data, filterKey, onFilter]);
 
-  // Reset visibility on mount
+  // Filter data and send to parent
   useEffect(() => {
-    setVisible(true);
-    timerRef.current = setTimeout(() => setVisible(false), 30000);
-    return () => clearTimeout(timerRef.current);
-  }, []);
+    onFilter(filteredData);
+  }, [searchTerm, data, filterKey, ]);
 
-  if (!visible) {
-    return (
-      <Search
-        className="cursor-pointer"
-        onClick={() => setVisible(true)}
-      />
-    );
-  }
+  
 
   return (
     <div className="flex gap-2 my-2">

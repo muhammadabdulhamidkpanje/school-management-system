@@ -5,17 +5,15 @@ import Card from "../../components/cards/cards";
 import Select from "../../components/inputs/select";
 import PrimaryButton from "../../components/button/button";
 import { handleSetBioData, handleSetAcademics, handleSetDepartment, handleSetLogin, handleSetAccount } from "../addstaff/addstaffSlice"
-
+import { useForm } from "react-hook-form"
 export default function AddStaff() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const staffReducer = useSelector((state)=>state.addStaff);
   const [tab, setTab] = React.useState(1);
   const dispatch = useDispatch();
 
   const [bioData, setBioData] = React.useState({
-    name: "",
-    email: "",
-    dob: "",
-    phone: "",
-    address: "",
+    ...staffReducer.staffBioData,
   });
 
   const [academics, setAcademics] = React.useState([
@@ -45,9 +43,27 @@ export default function AddStaff() {
     confirmPassword: "",
   });
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    // Submit to server here
+  async function onSubmit(e) {
+    const formData = {
+      loginData,
+      accountData,
+      departmentData,
+      academics,
+      bioData
+    }
+    try{
+      const response = fetch("localhost//3000/api/v1/addstaff",{
+        method:"POST",
+        headers: {
+          contentType: "application/json"
+        },
+        body: JSON.stringify(formData)
+      })
+      return await response.json();
+    }
+    catch(error){
+      console.error(error);
+    }
   }
 
   function handleNext() {
@@ -93,30 +109,32 @@ export default function AddStaff() {
         </Card>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={() => handleSubmit(onSubmit)} className="space-y-6">
         {tab === 1 && (
-          <StaffBioData bioData={bioData} setBioData={setBioData} />
+          <StaffBioData register={register} bioData={bioData} setBioData={setBioData} />
         )}
 
         {tab === 2 && (
-          <StaffAcademics academics={academics} setAcademics={setAcademics} />
+          <StaffAcademics register={register} academics={academics} setAcademics={setAcademics} />
         )}
 
         {/* Placeholder tabs */}
         {tab === 3 && (
           <StaffDepartment
+            register={register}
             departmentData={departmentData}
             setDepartmentData={setDepartmentData}
           />
         )}
         {tab === 4 && (
           <StaffAccount
+            register={register}
             accountData={accountData}
             setAccountData={setAccountData}
           />
         )}
         {tab === 5 && (
-          <StaffLogin loginData={loginData} setLoginData={setLoginData} />
+          <StaffLogin register={register} loginData={loginData} setLoginData={setLoginData} />
         )}
 
         <div className="flex justify-between">
@@ -202,7 +220,7 @@ function StaffBioData({bioData, setBioData}) {
   );
 }
 
-function StaffAcademics({ formData, setFormData }) {
+function StaffAcademics({ formData, setFormData, register }) {
   const [academics, setAcademics] = React.useState([
     {
       level: "Primary",
@@ -280,6 +298,7 @@ function StaffAcademics({ formData, setFormData }) {
             label="Institution"
             name={`institution-${index}`}
             value={entry.institution}
+            register={register}
             onChange={(e) =>
               handleAcademicChange(index, "institution", e.target.value)
             }
@@ -289,6 +308,7 @@ function StaffAcademics({ formData, setFormData }) {
             label="Qualification"
             name={`qualification-${index}`}
             value={entry.qualification}
+            register={register}
             onChange={(e) =>
               handleAcademicChange(index, "qualification", e.target.value)
             }
@@ -298,6 +318,7 @@ function StaffAcademics({ formData, setFormData }) {
             label="Year Obtained"
             name={`year-${index}`}
             value={entry.year}
+            register={register}
             onChange={(e) =>
               handleAcademicChange(index, "year", e.target.value)
             }
@@ -332,7 +353,7 @@ function StaffAcademics({ formData, setFormData }) {
   );
 }
 
-function StaffDepartment({ departmentData, setDepartmentData }) {
+function StaffDepartment({ departmentData, setDepartmentData, register }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setDepartmentData((prev) => ({
@@ -347,6 +368,7 @@ function StaffDepartment({ departmentData, setDepartmentData }) {
         label="Department"
         name="department"
         value={departmentData.department}
+        register={register}
         onChange={handleChange}
         placeholder="e.g. Computer Science"
         className="w-full md:w-[48%]"
@@ -356,6 +378,7 @@ function StaffDepartment({ departmentData, setDepartmentData }) {
         label="Faculty / School"
         name="faculty"
         value={departmentData.faculty}
+        register={register}
         onChange={handleChange}
         placeholder="e.g. Faculty of Science"
         className="w-full md:w-[48%]"
@@ -383,6 +406,7 @@ function StaffDepartment({ departmentData, setDepartmentData }) {
         label="Employment Date"
         name="employmentDate"
         type="date"
+        register={register}
         value={departmentData.employmentDate}
         onChange={handleChange}
         className="w-full md:w-[48%]"
@@ -391,7 +415,7 @@ function StaffDepartment({ departmentData, setDepartmentData }) {
   );
 }
 
-function StaffAccount({ accountData, setAccountData }) {
+function StaffAccount({ accountData, setAccountData, register }) {
   const handleChange = (e) => {
     const {name, value} = e.target;
     setAccountData((prev) => ({
@@ -404,6 +428,7 @@ function StaffAccount({ accountData, setAccountData }) {
       <Input
         label="Bank Name"
         name="bankName"
+        register={register}
         value={accountData.bankName}
         onChange={handleChange}
         placeholder= "e.g First Bank"
@@ -411,7 +436,8 @@ function StaffAccount({ accountData, setAccountData }) {
       />
       <Input
         label="Account Number"
-        name="accountNumber"  
+        name="accountNumber"
+        register={register}
         value={accountData.accountNumber}
         onChange={handleChange}
         placeholder="e.g. 123456789"
@@ -420,6 +446,7 @@ function StaffAccount({ accountData, setAccountData }) {
       <Input
         label="BVN"
         name="bvn"
+        register={register}
         value={accountData.bvn}
         onChange={handleChange}
         placeholder="e.g. 123456789"
@@ -429,7 +456,7 @@ function StaffAccount({ accountData, setAccountData }) {
   )
 }
 
-function StaffLogin({ loginData, setLoginData }) {
+function StaffLogin({ loginData, setLoginData, register }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setLoginData((prev) => ({
@@ -445,6 +472,7 @@ function StaffLogin({ loginData, setLoginData }) {
         name="email"
         type="email"
         value={loginData.email}
+        register={register}
         onChange={handleChange}
         placeholder="e.g. john.doe@example.com"
         className="w-full md:w-[48%]"
@@ -454,7 +482,9 @@ function StaffLogin({ loginData, setLoginData }) {
         label="Enter Password"
         name="password"
         type="password"
+        
         value={loginData.password}
+        register={register}
         onChange={handleChange}
         placeholder="Enter your password"
         className="w-full md:w-[48%]"
@@ -465,6 +495,7 @@ function StaffLogin({ loginData, setLoginData }) {
         name="password"
         type="password"
         value={loginData.password}
+        register={register}
         onChange={handleChange}
         placeholder="Enter your password"
         className="w-full md:w-[48%]"

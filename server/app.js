@@ -16,6 +16,7 @@ app.use(
 
 
 const authRoutes = require('./routes/authRoutes');
+const admissionRoutes = require('./routes/admissionRoute');
 
 
 
@@ -28,6 +29,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/admissions', admissionRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
