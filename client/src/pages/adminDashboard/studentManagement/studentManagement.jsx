@@ -86,10 +86,7 @@ export default function StudentManagement() {
   );
 }
 
-
-
-function AdminAdmission() {
-  const admissionData = [
+const admissionData = [
     { id: 1, name: "John Doe", email: "john@example.com", status: "Pending" },
     {
       id: 2,
@@ -105,6 +102,8 @@ function AdminAdmission() {
     { label: "department", value: "department" },
     { label: "status", value: "status" },
   ];
+
+function AdminAdmission() {
 
   const [filtered, setFiltered] = React.useState(admissionData);
   const [filterKey, setFilterKey] = React.useState("status");
@@ -158,24 +157,8 @@ function AdminAdmission() {
   );
 }
 
+
 function StudentList() {
-  const admissionData = [
-    { id: 1, name: "John Doe", email: "john@example.com", status: "Pending" },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      status: "Approved",
-    },
-  ];
-
-  const filterOptions = [
-    { label: "name", value: "name" },
-    { label: "email", value: "email" },
-    { label: "department", value: "department" },
-    { label: "status", value: "status" },
-  ];
-
   const [filtered, setFiltered] = React.useState(admissionData);
   const [filterKey, setFilterKey] = React.useState("status");
 

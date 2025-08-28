@@ -7,7 +7,7 @@ const shouldUseEnd = (path) => {
   return segments.length <= 2;
 };
 
-export default function List({ items, onToggle, className }) {
+export default function List({ items, onToggle, className,}) {
   return (
     <>
       {items.map((item) => (
@@ -16,7 +16,7 @@ export default function List({ items, onToggle, className }) {
           to={item.path}
           end={shouldUseEnd(item.path)}
           className={({ isActive }) =>
-            `flex items-center gap-2 rounded-md w-full px-2 py-2 transition-colors duration-200 ${className} ${
+            `flex items-center gap-1 rounded-md w-full px-2 transition-colors duration-200 ${className} ${
               isActive
                 ? "border-l-4 border-blue-500 bg-blue-100 font-semibold text-blue-900 shadow-sm"
                 : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"

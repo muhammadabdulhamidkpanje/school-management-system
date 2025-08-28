@@ -8,8 +8,6 @@ import SideNav from "../../components/navBar/DashboardNav/sideNav";
 import { Home, CalendarClock, Users, GraduationCap, Book, Settings, BookMarked } from "lucide-react";
 
 
-
-export default function AdminDashboard({ children }) {
   let items = [
     {
       path: "/",
@@ -47,6 +45,8 @@ export default function AdminDashboard({ children }) {
       icon: <Settings size={26} />,
     },
   ];
+
+export default function AdminDashboard({ children }) {
   
     items = items.map((item) => (
        { path: `admin-dashboard${item.path}`,

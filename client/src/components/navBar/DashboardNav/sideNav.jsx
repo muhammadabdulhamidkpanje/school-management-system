@@ -32,7 +32,7 @@ export default function SideNav({ items, className ,onToggleMenu, onSeToggleMenu
       <List
         items={items}
         onToggle={toggleMenu}
-        className="flex gap-4  w-full items-center capitalize "
+        className="flex gap-4  overflow-y-auto w-full items-center capitalize "
         />
     </ul>
     </nav>

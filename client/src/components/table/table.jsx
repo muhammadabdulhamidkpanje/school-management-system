@@ -25,7 +25,7 @@ function Header({ columns }) {
         {columns.map((col) => (
           <th
             key={col}
-            className="px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase"
+            className="px-4 py-3 text-center text-xs font-semibold tracking-wide uppercase"
           >
             {col}
           </th>
@@ -44,7 +44,7 @@ function Body({ renderRow }) {
       {data.map((item, index) => (
         <tr
           key={index}
-          className={`${
+          className={`text-center ${
             index % 2 === 0 ? "bg-white" : "bg-gray-50"
           } transition-colors duration-150 hover:bg-blue-50`}
         >

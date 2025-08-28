@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 export default function Filter({
   data = [],
@@ -17,12 +17,12 @@ export default function Filter({
     const value = e.target.value;
     setSearchTerm(value);
   };
-  
-    const filteredData = data.filter((item) =>
-      String(item[filterKey] || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
+
+  const filteredData = useCallback(() => data.filter((item) =>
+    String(item[filterKey] || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  ), [data, filterKey, searchTerm]);
 
   // Filter data and send to parent
   useEffect(() => {
