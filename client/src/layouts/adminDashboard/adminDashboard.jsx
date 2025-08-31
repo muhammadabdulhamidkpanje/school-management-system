@@ -47,6 +47,7 @@ import { Home, CalendarClock, Users, GraduationCap, Book, Settings, BookMarked }
   ];
 
 export default function AdminDashboard({ children }) {
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   
     items = items.map((item) => (
        { path: `admin-dashboard${item.path}`,
@@ -56,9 +57,9 @@ export default function AdminDashboard({ children }) {
     ))
     return (
       <div className="flex h-full">
-        <SideNav items={items} className="max-h-full" />
+        <SideNav setSidebarOpen={setSidebarOpen} items={items} className={`max-h-full ${sidebarOpen ? "block" : "hidden"}`} />
         <div className="flex h-full w-full flex-auto flex-col">
-          <DashboardNav />
+          <DashboardNav setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
           <Main className="h-lvh overflow-y-auto">
             <Outlet />
           </Main>

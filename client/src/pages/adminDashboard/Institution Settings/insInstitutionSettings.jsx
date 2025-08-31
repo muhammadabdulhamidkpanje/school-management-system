@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import CardListFlex from "../../../components/cards/cardlist";
 import HorizontalButton from "../../../UI/horizontalButton";
 import Headings from "../../../UI/headings";
@@ -7,6 +7,10 @@ import { useForm } from "react-hook-form";
 import Input from "../../../components/inputs/input";
 import PrimaryButton from "../../../components/button/button";
 import Table from "../../../components/table/table";
+import { useSelector, useDispatch } from "react-redux";
+
+import usePocketBase from "../../../../pocketbase/pocketbase";
+import FileInput from "../../../components/inputs/fileInput";
 
 const cards = [
     {title:"40", description: "department"},
@@ -49,11 +53,22 @@ function InstitutionProfile (){
 }
 
 function InstitutionInformationEdit() {
-    const {register} = useForm()
+    const {register, handleSubmit, formState:{isSubmitting, success}} = useForm()
+    const data1 = useSelector((state)=> state.auth)
+
+    const onSubmit = (data, e) => {
+        console.log(data1)
+        
+        
+    }
+    // useEffect((async()=>{
+
+    //     onSubmit()
+    // }))
     return(
         <>
         <Headings className="text-xl font-semibold">Institution Information Edit</Headings>
-        <form >
+        <form onSubmit={handleSubmit(onSubmit)}>
             <div className="flex gap-4">
             <Input
                 label={"Institution Name"}
@@ -71,6 +86,7 @@ function InstitutionInformationEdit() {
                 type="email"
             />
             </div>
+            <div className="flex gap-4">
             <Input
                 label={"Institution Address"}
                 name="institutionAddress"
@@ -78,7 +94,28 @@ function InstitutionInformationEdit() {
                 register={register}
                 className="w-[50%]"
             />
+            <Input
+                label={"Institution Phone"}
+                name="institutionPhone"
+                placeholder="Enter institution phone"
+                register={register}
+                className="w-[50%]"
+                type="tel"
+            />
+            </div>
+            <div className="flex gap-4">
+                <FileInput
+                label="institution logo"
+                name={"institution logo"}
+                onChange={{}} />
+                             
+                
+            </div>
+            <PrimaryButton width="100%" className="w-full" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit"}
+            </PrimaryButton>
         </form>
+
         </>
     )
 }

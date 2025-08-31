@@ -2,14 +2,20 @@ import React, { useEffect } from "react";
 import NavHeaderContainer from "../../../UI/navHeader";
 import Avatar from "../../Avater/avater";
 import SearchInput from "../../search";
-import { Bell, Mail, Search } from "lucide-react";
+import { Bell, Mail, Menu, Search } from "lucide-react";
 import { useLocation } from "react-router"; 
+import { useSelector } from "react-redux";
 
-export default function DashboardNav({ nav }) {
+export default function DashboardNav({  setSidebarOpen, sidebarOpen }) {
   const [showSearch, setShowSearch] = React.useState(false);
   const searchRef = React.useRef();
   const location = useLocation();
   const toggleSearch = () => setShowSearch((prev) => !prev);
+  const authUser = JSON.parse(localStorage.getItem("token"));
+//  const authUser = useSelector((state) => state.auth.user);
+  let  user = authUser.record
+  console.log(user)
+
 
   useEffect(() => {
     if (showSearch) {
@@ -30,10 +36,14 @@ export default function DashboardNav({ nav }) {
   };
 
   return (
-    <NavHeaderContainer className="flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm">
+    <NavHeaderContainer className="flex h-16 px-4 items-center justify-between border-b bg-white shadow-sm">
       {/* Left: Dynamic Page Title */}
+      <div className="sm:hidden px-2">
+        <Menu 
+        onClick={() => setSidebarOpen(!sidebarOpen)}  />
+      </div>
       <div className="w-1/4">
-        <h1 className="text-xl font-bold capitalize sm:text-2xl">
+        <h1 className="sm:text-2xl text-sm font-bold capitalize">
           {getPageTitle()}
         </h1>
       </div>
@@ -62,11 +72,9 @@ export default function DashboardNav({ nav }) {
         <Mail className="cursor-pointer text-gray-600 hover:text-gray-800" />
         <Avatar
           src="/avater.jpeg"
-          user={{
-            name: "Ibrahim Musa",
-            email: "admin@example.com",
-            role: "admin",
-          }}
+          user={
+            user
+          }
         />
       </div>
     </NavHeaderContainer>

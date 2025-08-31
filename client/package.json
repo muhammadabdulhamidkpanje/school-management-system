@@ -16,12 +16,14 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.0",
     "lucide-react": "^0.511.0",
+    "pocketbase": "^0.26.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.62.0",
     "react-redux": "^9.2.0",
     "react-router": "^7.6.1",
     "recharts": "^3.1.0",
+    "redux-persist": "^6.0.0",
     "yup": "^1.7.0"
   },
   "devDependencies": {

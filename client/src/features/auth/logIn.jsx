@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router";
 import Input from "../../components/inputs/input";
+import { useDispatch } from "react-redux";
+import { authLogin } from "./authSlice";
+import PocketBase from 'pocketbase';
+
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,6 +13,9 @@ export default function Login() {
   const [error, setError] = useState("");
   const [disabled, setDisabled] = useState(false);
   const [redirect, setRedirect] = useState(false);
+  const dispatch = useDispatch();
+  const pb = new PocketBase('http://127.0.0.1:8090');
+  
 
   // Auto-redirect if already logged in
   useEffect(() => {
@@ -16,28 +23,44 @@ export default function Login() {
     if (token) setRedirect(true);
   }, []);
 
+  // const onSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   setDisabled(true);
+  //   try {
+  //     const res = await fetch("http://localhost:3000/api/v1/auth/login", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ email, password }),
+  //     });
+
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data.detail || "Login failed");
+  //     console.log(data);
+  //     localStorage.setItem("token", JSON.stringify(data));
+  //     dispatch(authLogin(JSON.parse(localStorage.getItem("token"))));
+
+  //     setRedirect(true);
+  //   } catch (err) {
+  //     setError(err.message);
+  //     setDisabled(false);
+  //   }
+  // };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setDisabled(true);
     try {
-      const res = await fetch("http://localhost:3000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Login failed");
-
-      localStorage.setItem("token", data.token);
+      const authData =  await pb.collection('users').authWithPassword( email, password,);
       setRedirect(true);
-    } catch (err) {
-      setError(err.message);
+      dispatch(authLogin(authData));
+      localStorage.setItem("token", JSON.stringify(authData));
+    } catch (error) {
+      setError(error.message);
       setDisabled(false);
     }
   };
-
   if (redirect) return <Navigate to="/admin-dashboard" />;
 
   return (

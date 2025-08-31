@@ -25,10 +25,9 @@ const Input = ({
         name={name}
         type={type}
         placeholder={placeholder}
-        value={value}
-        // 👇 Spread register only if provided
         {...(register ? register(name) : {})}
-        onChange={onChange}
+        {...(value !== undefined ? { value } : {})}
+        {...(onChange ? { onChange } : {})}
         className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
       />
     </div>
