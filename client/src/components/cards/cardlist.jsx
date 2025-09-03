@@ -4,7 +4,7 @@ import Card from "./cards";
 
 export default function CardListFlex({ cards = [] }) {
   return (
-    <div className="p-4 w-full flex justify-center">
+    <div className="p-4 w-full flex flex-wrap ">
         {cards.map((card, index) => (
            <div key={index} className="mb-4 h-25 w-full center px-2 sm:w-1/2 lg:w-1/3">
             <Card cardDetails={card} className="w-full h-full border-b-2 border-blue-200 bg-white shadow-md">

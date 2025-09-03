@@ -10,6 +10,8 @@ import Table from "../../../components/table/table";
 import { useSelector, useDispatch } from "react-redux";
 
 import usePocketBase from "../../../../pocketbase/pocketbase";
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090'); 
 import FileInput from "../../../components/inputs/fileInput";
 
 const cards = [
@@ -21,16 +23,16 @@ export default function InstitutionSettings() {
     const [tab, setTab] = React.useState(1);
 
   return (
-    <section className="flex w-full p-4 gap-4">
-      <section className="mb-4 w-[80%]">
+    <section className="flex w-full p-4 gap-4 flex-wrap">
+      <section className="mb-4 w-full sm:w-[80%]">
         <CardListFlex cards={cards} />
-        <HorizontalButton data={buttonData} className="w-full" tab={tab} setTab={setTab} onClick={setTab} />
+        <HorizontalButton data={buttonData} className="" tab={tab} setTab={setTab} onClick={setTab} />
         {tab === 1 && <InstitutionProfile />}
         {tab === 2 && <AcademicSettings />}
         {tab === 3 && <FacultySettings />}
         {tab === 4 && <DepartmentSettings />}
       </section>
-    <aside className="bg-white shadow rounded p-4 w-[20%]">
+    <aside className="bg-white shadow rounded p-4 sm:w-[20%]">
     </aside>
     </section>
   );
@@ -42,9 +44,9 @@ function InstitutionProfile (){
     return(
         <>
         <Headings className="text-xl font-semibold">Institutional settings</Headings>
-         <div className="flex w-full justify-between gap-2">
-            <VerticalButton tab={tab} setTab={setTab} data={[{label:"Institution cards", value:1},{label:"Institution Information Edit", value:2}]} className="" onClick={setTab} />
-           <div className="w-[75%] shadow p-4">
+         <div className="flex w-full flex-wrap justify-between gap-2">
+            <VerticalButton tab={tab} className="" setTab={setTab} data={[{label:"Institution cards", value:1},{label:"Institution Information Edit", value:2}]} onClick={setTab} />
+           <div className="sm:w-[73%] w-full sm:shadow p-4 shadow-xl ">
             {tab === 2 && <InstitutionInformationEdit />}
            </div>
            </div>
@@ -56,16 +58,20 @@ function InstitutionInformationEdit() {
     const {register, handleSubmit, formState:{isSubmitting, success}} = useForm()
     const data1 = useSelector((state)=> state.auth)
 
-    const onSubmit = (data, e) => {
-        console.log(data1)
-        
+    const onSubmit = async (data, e) => {
+        console.log(data)
+        const record = await pb.collection('institutionalProfile').create(data);
+
         
     }
-    // useEffect((async()=>{
-
-    //     onSubmit()
-    // }))
+    useEffect(()=>{
+        async function fetchData() {
+            await onSubmit()
+        }
+        fetchData()
+    }, [])
     return(
+        
         <>
         <Headings className="text-xl font-semibold">Institution Information Edit</Headings>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -124,11 +130,11 @@ const academicButtons = [{label: "Sessions", value: 1},{label: "Semesters", valu
 function AcademicSettings() {
     const [tab, setTab] = React.useState(1)
     return (
-        <div className="p-4">
-            <Headings className="text-xl font-semibold">Academic Settings</Headings>
-           <div className="flex w-full justify-between gap-2">
-            <VerticalButton data={academicButtons} className="" tab={tab} setTab={setTab} onClick={setTab} />
-           <div className="w-[75%] shadow">
+        <div className="p-4 flex flex-wrap">
+            <Headings className="text-xl w-full font-semibold">Academic Settings</Headings>
+           <div className="flex w-full flex-wrap justify-between gap-2">
+            <VerticalButton data={academicButtons} className="w-[24%] " tab={tab} setTab={setTab} onClick={setTab} />
+           <div className="w-full sm:w-[73%] shadow">
            {tab === 1 && <Sessions />}
            {tab === 2 && <GradingSystemsSettings />}
            {tab === 3 && <AcademicCalendarsSettings />}

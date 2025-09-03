@@ -6,10 +6,13 @@ import Footer from "../../components/footer/footer";
 import SideNav from "../../components/navBar/DashboardNav/sideNav";
 import { Outlet } from "react-router";
 import Table from "../../components/table/table";
+import useAuthGuard from "../../hooks/useAuthGuard";
 
 
 export default function StudentDashboard({ children }) {
-  
+  const authGuard = useAuthGuard(["student"]);
+  if (authGuard) return authGuard;
+
     const items = [
       { path: "/dashboard", name: "Dashboard", icon: "icon" },
       { path: "/Attendances", name: "Atendances", icon: "/icons" },

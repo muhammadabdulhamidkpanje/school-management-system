@@ -86,7 +86,7 @@ export default function AddStaff() {
       <h1 className="py-2 text-3xl text-blue-600 uppercase">Add Staff</h1>
 
       <div className="mb-4">
-        <Card className="flex h-12 items-center !justify-evenly gap-2 rounded-lg shadow-sm">
+        <Card className="flex sm:h-12 items-center !justify-evenly gap-2 rounded-lg shadow-sm">
           {[
             { label: "Bio Data", value: 1 },
             { label: "Academics", value: 2 },
