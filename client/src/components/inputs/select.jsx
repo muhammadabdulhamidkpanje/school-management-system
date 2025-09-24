@@ -9,6 +9,8 @@ export default function Select({
   placeholder = "Select an option",
   className = "",
   error = "",
+  rules,
+  register,
   disabled = false,
 }) {
   return (
@@ -16,8 +18,7 @@ export default function Select({
       {label && (
         <label
           htmlFor={name}
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
+           className="mb-2 text-sm font-bold text-blue-500 uppercase">
           {label}
         </label>
       )}
@@ -25,6 +26,7 @@ export default function Select({
         id={name}
         name={name}
         value={value}
+        {...(register ? register(name, rules) : {})}
         onChange={onChange}
         disabled={disabled}
         className={`w-full rounded-md border bg-white p-2 text-gray-700 transition-all focus:ring-1 focus:outline-none ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"} `}

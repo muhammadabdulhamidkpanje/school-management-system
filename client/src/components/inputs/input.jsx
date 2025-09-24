@@ -7,7 +7,9 @@ const Input = ({
   placeholder,
   value,
   onChange,
-  register, // 👈 added support for RHF register
+  register, // 👈 register from RHF
+  rules = {}, // 👈 validation rules (e.g., { required: "This field is required" })
+  error, // 👈 error from RHF's formState.errors[name]
   className = "",
 }) => {
   return (
@@ -20,16 +22,23 @@ const Input = ({
           {label}
         </label>
       )}
+
       <input
         id={name}
         name={name}
         type={type}
         placeholder={placeholder}
-        {...(register ? register(name) : {})}
+        {...(register ? register(name, rules) : {})}
         {...(value !== undefined ? { value } : {})}
         {...(onChange ? { onChange } : {})}
-        className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        className={`w-full rounded-md border p-2 focus:ring-2 focus:outline-none
+          ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+        `}
       />
+
+      {error && (
+        <span className="mt-1 text-sm text-red-500">{error.message}</span>
+      )}
     </div>
   );
 };

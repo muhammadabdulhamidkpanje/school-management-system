@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { NavLink, Link } from "react-router";
 
@@ -7,7 +6,8 @@ import HamburgerMenu from "./hambuger";
 import PrimaryButton from "../button/button";
 import Logo from "../logo/logo";
 import NavHeaderContainer from "../../UI/navHeader";
-
+import { useSelector } from "react-redux";
+import Avatar from "../Avater/avater";
 
 const menuItems = [
   { name: "Home", path: "/" },
@@ -17,6 +17,18 @@ const menuItems = [
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState("guest");
+
+  useEffect(() => {
+    const authUser = JSON.parse(localStorage.getItem("token"));
+    if (authUser && authUser.record && authUser.record.role) {
+      setRole(authUser.record.role);
+      setUser(authUser.record);
+    }
+    
+  }, []); // Run only once when the component mounts
+
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
@@ -62,15 +74,24 @@ function Navbar() {
         toggleMenu={toggleMenu}
       />
       <div className="flex items-center justify-around gap-4">
-        <PrimaryButton color="white" height="10" width="32" bg="blue-500">
-          <Link to="/auth/login">
-            <span className="text-white">log in</span>
-          </Link>
-        </PrimaryButton>
+        {role === "guest" && (
+          <PrimaryButton color="white" height="10" width="32" bg="blue-500">
+            <Link to="/auth/login">
+              <span className="text-white">log in</span>
+            </Link>
+          </PrimaryButton>
+        )}
+        {role !== "guest" && (
+          <PrimaryButton color="white" height="10" width="32" bg="blue-500">
+            <Link to="/auth/login">
+              <span className="text-white">Dashboard </span>
+            </Link>
+          </PrimaryButton>
+        )}
         <PrimaryButton color="white" height="" width="" bg="blue-500">
-          <Link
-          className="text-white"
-          to="/admission">Admission</Link>
+          <Link className="text-white" to="/admission">
+            Admission
+          </Link>
         </PrimaryButton>
       </div>
     </NavHeaderContainer>

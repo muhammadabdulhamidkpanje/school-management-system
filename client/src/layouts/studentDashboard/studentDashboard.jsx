@@ -1,4 +1,13 @@
 import React from "react";
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  CreditCard,
+  CircleSlashedIcon,
+  FileText,
+  User,
+} from "lucide-react";
+
 
 import Main from "../../UI/Main";
 import DashboardNav from "../../components/navBar/DashboardNav/dashboardnav";
@@ -8,31 +17,31 @@ import { Outlet } from "react-router";
 import Table from "../../components/table/table";
 import useAuthGuard from "../../hooks/useAuthGuard";
 
+const items = [
+  { path: "/student-dashboard", name: "Dashboard", icon: <LayoutDashboard size={20} /> },
+  { path: "/student-courses", name: "Courses", icon: <CreditCard size={20} /> },
+  { path: "/student-attendances", name: "Attendances", icon: <CalendarCheck size={20} /> },
+  { path: "/student-payments", name: "Payments", icon: <CreditCard size={20} /> },
+  { path: "/student-result", name: "Result", icon: <FileText size={20} /> },
+  { path: "/student-profile", name: "Profile", icon: <User size={20} /> },
+];
+
 
 export default function StudentDashboard({ children }) {
+    const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const authGuard = useAuthGuard(["student"]);
   if (authGuard) return authGuard;
 
-    const items = [
-      { path: "/dashboard", name: "Dashboard", icon: "icon" },
-      { path: "/Attendances", name: "Atendances", icon: "/icons" },
-      { path: "/Profile", name: "Profile", icon: "/icons" },
-      { path: "/student-result", name: "Payments", icon: "/icons" },
-    ];
-    return (
-      <div className="flex h-full ">
-        <SideNav items={items} className="max-h-full" />
-        <div className="flex flex-col flex-auto h-full w-full "> 
+  return (
+    <div className="flex h-full">
+      <SideNav items={items} className="max-h-full" />
+      <div className="flex h-full w-full flex-auto flex-col">
         <DashboardNav />
-        <Main>
-          
+        <Main className="h-lvh overflow-y-auto">
           <Outlet />
-        
         </Main>
         <Footer />
-        </div>
       </div>
-    );
+    </div>
+  );
 }
-
-

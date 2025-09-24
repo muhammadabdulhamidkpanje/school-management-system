@@ -4,7 +4,6 @@ import Avatar from "../../Avater/avater";
 import SearchInput from "../../search";
 import { Bell, Mail, Menu, Search } from "lucide-react";
 import { useLocation } from "react-router"; 
-import { useSelector } from "react-redux";
 
 export default function DashboardNav({  setSidebarOpen, sidebarOpen }) {
   const [showSearch, setShowSearch] = React.useState(false);

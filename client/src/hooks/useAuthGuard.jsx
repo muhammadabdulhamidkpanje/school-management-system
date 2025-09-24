@@ -1,25 +1,36 @@
-import React from "react";
-import { Navigate, Outlet, Route, Routes  } from "react-router";
+import React, { useState, useEffect } from "react";
+import { Navigate } from "react-router";
 import pb from "../lib/pocketbase";
-import Login from "../features/auth/logIn";
-
 
 const useAuthGuard = (allowedRoles = []) => {
-  const user = pb.authStore.record;
+  const [user, setUser] = useState(pb.authStore.record);
+  const [isValid, setIsValid] = useState(pb.authStore.isValid);
 
-  if (!pb.authStore.isValid) {
-    return (
-      <Navigate to="/auth/login" />
-    );
+  useEffect(() => {
+    // Subscribe to PocketBase auth changes
+    const unsubscribe = pb.authStore.onChange(() => {
+      setUser(pb.authStore.record);
+      setIsValid(pb.authStore.isValid);
+
+      // Force reload when auth or user changes
+      window.location.reload();
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+
+  // If no valid auth → redirect to login
+  if (!isValid) {
+    return <Navigate to="/auth/login" replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.roles)) {
-    return (
-      <Navigate to="/unauthorized" />
-    );
+  // If user exists but role not allowed → redirect unauthorized
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
-  return  <Outlet /> && null; // ✅ means "allowed"
+  // ✅ Allowed → continue rendering
+  return null;
 };
 
 export default useAuthGuard;
