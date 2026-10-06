@@ -5,7 +5,7 @@ import * as yup from "yup";
 import HorizontalButton from "../../UI/horizontalButton";
 import Input from "../../components/inputs/input";
 import PrimaryButton from "../../components/button/button";
-import FileInput from "../../UI/fileInput";
+import FileInput from "../../components/inputs/fileInput";
 import Headings from "../../UI/headings";
 import Card from "../../components/cards/cards";
 
@@ -96,11 +96,12 @@ function StudentFeeForm() {
 
         {/* File Input not tied to RHF */}
         <FileInput
-          accept="image/*"
+          fileType="image"
           label="Upload Fee Image"
-          id="feeImage"
           name="feeImage"
-          onChange={(e) => setFile(e.target.files[0])}
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          helperText="PNG, JPG, GIF or WEBP"
+          maxSizeMB={5}
         />
 
         <PrimaryButton type="submit" className="!w-full">

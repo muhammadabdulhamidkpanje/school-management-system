@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import ResultsSection from "../features/admission/result"; // Adjust the import path as necessary
 import PersonalInfoForm from "../features/admission/personalInnfo"; // Adjust the import path as necessary
 import DocumentUpload from "../features/admission/document";
+import pb from "../lib/pocketbase";
 
 //import { submitAdmission } from "../features/admission/admissionSlice";
 
@@ -15,26 +16,47 @@ export default function Admission() {
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 3));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
 
+  // const handleSubmit = async () => {
+  //   const admissionData = {
+  //     personalInfo: admission,
+  //     // results: admission.results,
+  //     // documents: admission.documents,
+  //   };
+  //   console.log(admissionData)
+  //   try {
+  //   const response = await fetch("http://localhost:3000/api/v1/admissions", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(admissionData),
+  //     });
+  //     return await response.json();
+  //   } catch (error) {
+  //     console.error("Error submitting admission:", error);
+  //   }
+  // };
+
   const handleSubmit = async () => {
-    const admissionData = {
-      personalInfo: admission,
-      // results: admission.results,
-      // documents: admission.documents,
-    };
-    console.log(admissionData)
-    try {
-    const response = await fetch("http://localhost:3000/api/v1/admissions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(admissionData),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Error submitting admission:", error);
-    }
-  };
+    const data = {
+    "first_name": "test",
+    "last_name": "test",
+    "middle_name": "test",
+    "email": "test@example.com",
+    "date_of_birth": "2022-01-01 10:00:00.123Z",
+    "gender": "test",
+    "nationality": "test",
+    "state": "test",
+    "lga": "test",
+    "reg_number": "test",
+    "english": "test",
+    "math": "test",
+    "otherCourses": "test"
+};
+
+const record = await pb.collection('admission').create(data);
+
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">

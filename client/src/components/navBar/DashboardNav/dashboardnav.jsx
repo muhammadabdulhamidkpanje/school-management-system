@@ -3,6 +3,7 @@ import NavHeaderContainer from "../../../UI/navHeader";
 import Avatar from "../../Avater/avater";
 import SearchInput from "../../search";
 import { Bell, Mail, Menu, Search } from "lucide-react";
+import {useSelector} from "react-redux"
 import { useLocation } from "react-router"; 
 
 export default function DashboardNav({  setSidebarOpen, sidebarOpen }) {
@@ -10,9 +11,9 @@ export default function DashboardNav({  setSidebarOpen, sidebarOpen }) {
   const searchRef = React.useRef();
   const location = useLocation();
   const toggleSearch = () => setShowSearch((prev) => !prev);
-  const authUser = JSON.parse(localStorage.getItem("token"));
-//  const authUser = useSelector((state) => state.auth.user);
-  let  user = authUser.record
+  // const authUser = JSON.parse(localStorage.getItem("token"));
+ const authUser = useSelector((state) => state.auth.user);
+  let  user = authUser.email
   console.log(user)
 
 

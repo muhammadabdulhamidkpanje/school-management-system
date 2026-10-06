@@ -15,7 +15,6 @@ import Footer from "../../components/footer/footer";
 import SideNav from "../../components/navBar/DashboardNav/sideNav";
 import { Outlet } from "react-router";
 import Table from "../../components/table/table";
-import useAuthGuard from "../../hooks/useAuthGuard";
 
 const items = [
   { path: "/student-dashboard", name: "Dashboard", icon: <LayoutDashboard size={20} /> },
@@ -29,9 +28,6 @@ const items = [
 
 export default function StudentDashboard({ children }) {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const authGuard = useAuthGuard(["student"]);
-  if (authGuard) return authGuard;
-
   return (
     <div className="flex h-full">
       <SideNav items={items} className="max-h-full" />

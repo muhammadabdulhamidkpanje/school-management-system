@@ -5,7 +5,6 @@ import Main from "../../UI/Main";
 import DashboardNav from "../../components/navBar/DashboardNav/dashboardnav";
 import Footer from "../../components/footer/footer";
 import SideNav from "../../components/navBar/DashboardNav/sideNav";
-import useAuthGuard from "../../hooks/useAuthGuard";
 import { Home, CalendarClock, Users, GraduationCap, Book, Settings, BookMarked } from "lucide-react";
 
 
@@ -54,9 +53,7 @@ import { Home, CalendarClock, Users, GraduationCap, Book, Settings, BookMarked }
     }
     ))
 
-export default function StaffDashboard({ children }) {
-  const authGuard = useAuthGuard(["staff"]);
-  if (authGuard) return authGuard;
+export default function StaffDashboard() {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   
 

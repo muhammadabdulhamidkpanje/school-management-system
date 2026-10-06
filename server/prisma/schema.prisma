@@ -1,0 +1,206 @@
+generator client {
+provider = "prisma-client-js"
+}
+
+datasource db {
+provider = "postgresql"
+}
+
+enum UserStatus {
+ACTIVE
+INACTIVE
+SUSPENDED
+}
+
+enum Gender {
+MALE
+FEMALE
+}
+
+enum StaffType {
+ACADEMIC
+NON_ACADEMIC
+}
+
+enum StudentStatus {
+ACTIVE
+GRADUATED
+SUSPENDED
+}
+
+enum RelationshipType {
+FATHER
+MOTHER
+GUARDIAN
+}
+
+model Role {
+id          Int      @id @default(autoincrement())
+name        String   @unique
+description String?
+
+users       User[]
+
+createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+}
+
+model User {
+id           String     @id @default(uuid())
+
+email        String     @unique
+passwordHash String
+
+roleId       Int
+role         Role       @relation(fields: [roleId], references: [id])
+
+status       UserStatus @default(ACTIVE)
+
+staff        Staff?
+student      Student?
+parent       Parent?
+
+createdAt    DateTime   @default(now())
+updatedAt    DateTime   @updatedAt
+}
+
+model School {
+id          String   @id @default(uuid())
+
+name        String
+email       String?
+phone       String?
+address     String?
+
+staff       Staff[]
+students    Student[]
+
+createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+}
+
+model Department {
+id          String   @id @default(uuid())
+
+name        String   @unique
+description String?
+
+staff       Staff[]
+
+createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+}
+
+model Staff {
+id            String      @id @default(uuid())
+
+userId        String      @unique
+user          User        @relation(fields: [userId], references: [id])
+
+schoolId      String
+school        School      @relation(fields: [schoolId], references: [id])
+
+departmentId  String?
+department    Department? @relation(fields: [departmentId], references: [id])
+
+staffNumber   String      @unique
+
+firstName     String
+lastName      String
+
+gender        Gender
+
+phone         String?
+address       String?
+
+qualification String?
+
+staffType     StaffType
+
+dateEmployed  DateTime?
+
+createdAt     DateTime @default(now())
+updatedAt     DateTime @updatedAt
+
+classTeacherFor Class[]
+}
+
+model Class {
+id             String   @id @default(uuid())
+
+name           String
+section        String?
+
+classTeacherId String?
+classTeacher   Staff?   @relation(fields: [classTeacherId], references: [id])
+
+students       Student[]
+
+createdAt      DateTime @default(now())
+updatedAt      DateTime @updatedAt
+}
+
+model Student {
+id               String        @id @default(uuid())
+
+userId           String        @unique
+user             User          @relation(fields: [userId], references: [id])
+
+schoolId         String
+school           School        @relation(fields: [schoolId], references: [id])
+
+classId          String?
+class            Class?        @relation(fields: [classId], references: [id])
+
+admissionNumber  String        @unique
+
+firstName        String
+lastName         String
+
+gender           Gender
+
+address          String?
+
+admissionDate    DateTime?
+
+status           StudentStatus @default(ACTIVE)
+
+parents          ParentStudent[]
+
+createdAt        DateTime @default(now())
+updatedAt        DateTime @updatedAt
+}
+
+model Parent {
+id          String   @id @default(uuid())
+
+userId      String   @unique
+user        User     @relation(fields: [userId], references: [id])
+
+firstName   String
+lastName    String
+
+phone       String?
+occupation  String?
+
+students    ParentStudent[]
+
+createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+}
+
+model ParentStudent {
+id           String            @id @default(uuid())
+
+parentId     String
+studentId    String
+
+relationship RelationshipType
+
+parent       Parent            @relation(fields: [parentId], references: [id])
+student      Student           @relation(fields: [studentId], references: [id])
+
+createdAt    DateTime @default(now())
+
+@@unique([parentId, studentId])
+}

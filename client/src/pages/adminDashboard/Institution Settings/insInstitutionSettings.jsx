@@ -16,6 +16,8 @@ const cards = [
     {title: "12", description: "faculties"}
 ]
 const buttonData = [{ label: "institution profile", value: 1 },{ label: "Academic settings", value: 2 }, { label: "Faculties", value: 3 }, { label: "Departments", value: 4 }];
+
+
 export default function InstitutionSettings() {
     const [tab, setTab] = React.useState(1);
 

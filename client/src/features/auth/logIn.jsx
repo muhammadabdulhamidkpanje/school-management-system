@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate } from "react-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authLogin } from "./authSlice";
-import PocketBase from "pocketbase";
-import { Eye, EyeOff } from "lucide-react"; 
+import { login as loginRequest } from "./authApi";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,15 +12,16 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [disabled, setDisabled] = useState(false);
-  const [redirect, setRedirect] = useState(false);
-  const [urlRedirect, setUrlRedirect] = useState("");
   const dispatch = useDispatch();
-  const pb = new PocketBase("http://127.0.0.1:8090");
 
-  const {handleSubmit} = useForm();
+  // redux-persist already rehydrates this from storage, so if a valid
+  // session exists we redirect without hitting the network.
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  function determineRedirectUrl(role) {
-    switch (role) {
+  const { handleSubmit } = useForm();
+
+  function determineRedirectUrl(roleName) {
+    switch (roleName) {
       case "admin":
         return "/admin-dashboard";
       case "staff":
@@ -32,41 +33,23 @@ export default function Login() {
     }
   }
 
-  // Auto-redirect if already logged in
-  useEffect(() => {
-    const authData = JSON.parse(localStorage.getItem("token"));
-    if (authData?.record?.role) {
-      setUrlRedirect(determineRedirectUrl(authData.record.role));
-      setRedirect(true);
-    }
-  }, []);
-
   const onSubmit = async () => {
     setError("");
     setDisabled(true);
     try {
-      const authData = await pb
-        .collection("users")
-        .authWithPassword(email, password);
-
-      // First dispatch the action
-      dispatch(authLogin(authData));
-      
-      // Then store in localStorage
-      localStorage.setItem("token", JSON.stringify(authData));
-
-      // Finally set the redirect URL and trigger redirect
-      const redirectUrl = determineRedirectUrl(authData.record.role);
-      setUrlRedirect(redirectUrl);
-      setRedirect(true);
-
+      // { accessToken, user } — see authApi.login() / auth.controller.ts login()
+      const result = await loginRequest(email, password);
+      dispatch(authLogin(result));
     } catch (err) {
-      setError(err.message);
+      // Backend error shape: { success: false, message, errors } (utils/response.ts)
+      setError(err.response?.data?.message ?? "Something went wrong. Please try again.");
       setDisabled(false);
     }
   };
 
-  if (redirect) return <Navigate to={urlRedirect} />;
+  if (isAuthenticated && user) {
+    return <Navigate to={determineRedirectUrl(user.role?.name)} />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
@@ -105,7 +88,7 @@ export default function Login() {
               id="email"
               type="email"
               name="email"
-              autoComplete="username" // ✅ correct autocomplete
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
@@ -126,7 +109,7 @@ export default function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 name="password"
-                autoComplete="current-password" // ✅ correct autocomplete
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
@@ -156,7 +139,7 @@ export default function Login() {
           </button>
 
           <p className="text-sm text-gray-600">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <span className="cursor-pointer text-blue-600 hover:underline">
               Sign up
             </span>

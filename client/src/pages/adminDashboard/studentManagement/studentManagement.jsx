@@ -4,6 +4,7 @@ import HolizontalButton from "../../../UI/horizontalButton";
 import Table from "../../../components/table/table";
 import Filter from "../../../components/filter/filter";
 import StudentFee from "../../../features/studentFees/studentFee";
+import StudentAttendance from "./studentAttendance";
 
 const sampleData = [
   { name: "Abdulhamid", role: "Developer" },
@@ -62,7 +63,7 @@ export default function StudentManagement() {
         </div>
         {tab === 1 && <AdminAdmission />}
         {tab === 2 && <StudentList />}
-        {tab === 3 && <div className="p-4">Student Attendance Component</div>}
+        {tab === 3 && <StudentAttendance />}
         {tab === 4 && <div className="p-4">Student Grades Component</div>}
         {tab === 5 && <StudentFee />}
       </section>

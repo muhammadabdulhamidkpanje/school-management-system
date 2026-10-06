@@ -6,7 +6,7 @@ export default function Card({ children, cardDetails, className = "" }) {
   return (
     <CardContext.Provider value={{ cardDetails }}>
       <div
-        className={`flex w-full justify-center   flex-wrap shadow-md ${className}`}
+        className={`flex w-full justify-center capitalize flex-wrap shadow-md ${className}`}
       >
         {children}
       </div>

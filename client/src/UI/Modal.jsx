@@ -38,8 +38,11 @@ function Window({ children, name, width, height }) {
   if (name !== openName) return null;
 
   return createPortal(
-    <Overlay width={width} height={height} bg="black-500" onClickOutside={close}>
-      <div className="relative z-10 w-full max-w-md space-y-4 rounded-xl bg-white p-6 shadow-xl">
+    <Overlay  bg="black-500" onClickOutside={close}>
+      <div 
+        style={{ width, height }} 
+        className="relative z-10 w-full space-y-4 rounded-xl bg-white p-6 shadow-xl"
+      >
         {children}
       </div>
     </Overlay>,
@@ -52,7 +55,7 @@ function Header({ children }) {
   const { close } = useContext(ModalContext);
 
   return (
-    <div className="flex items-center justify-between border-b p-4">
+    <div className="flex items-center justify-between border-b border-blue-500 p-4">
       <h2 className="text-lg font-semibold">{children}</h2>
       <button
         onClick={close}

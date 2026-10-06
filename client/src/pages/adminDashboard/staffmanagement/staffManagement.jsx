@@ -4,42 +4,25 @@ import Card from "../../../components/cards/cards";
 import AddStaff from "../../../features/addstaff/addStaff";
 import StaffList from "../../../features/stafflist/staffList";
 import StaffAttendance from "../../../features/staffAttendance/attendance";
+import { Count } from "../../../features/dashboard";
+
 
 export default function StaffManagement() {
-  const [tab, setTab] = useState(1);
+  const [tab, setTab] = useState(2);
 
   const cards = [
-    {
-      id: 1,
-      image: { src: "/images/edu.jpg", alt: "Education" },
-      link: { href: "/learn", label: "Learn more" },
-      title: "300",
-      description: "Staff",
-    },
+    { id: 1, value: <Count resource="staff" />, description: "Staff" },
     {
       id: 2,
-      image: { src: "/images/tech.jpg", alt: "Technology" },
-      link: { href: "/tech", label: "Discover" },
-      title: "180",
-      description: "Academic Staff",
+      value: <Count resource="staff" params={{ isActive: "true" }} />,
+      description: "Active",
     },
     {
       id: 3,
-      image: { src: "/images/science.jpg", alt: "Science" },
-      link: { href: "/science", label: "Explore" },
-      title: "120",
-      description: "Non-Academic Staff",
-    },
-    {
-      id: 4,
-      image: { src: "/images/science.jpg", alt: "Science" },
-      link: { href: "/science", label: "Explore" },
-      title: "20",
-      description: "Administrative Staff",
+      value: <Count resource="staff" params={{ isActive: "false" }} />,
+      description: "Inactive",
     },
   ];
-
-  
 
   return (
     <section className="flex flex-col gap-4 p-4 lg:flex-row">
@@ -48,45 +31,47 @@ export default function StaffManagement() {
         <CardListFlex cards={cards} />
 
         {/* Tabs */}
-        <Card className="flex flex-wrap items-center !justify-evenly gap-2 rounded-md bg-white p-4 shadow">
-          <button
-            onClick={() => setTab(1)}
-            className={`rounded-md px-6 py-2 uppercase ${
-              tab === 1 ? "bg-blue-600 text-white" : "bg-gray-200"
-            }`}
-          >
-            Add Staff
-          </button>
+        <div className="mt-4 flex gap-6 border-b border-gray-200">
           <button
             onClick={() => setTab(2)}
-            className={`rounded-md px-4 py-2 uppercase ${
-              tab === 2 ? "bg-blue-600 text-white" : "bg-gray-200"
+            className={`-mb-px border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
+              tab === 2
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-900"
             }`}
           >
-            Staff List
+            Staff list
           </button>
           <button
             onClick={() => setTab(3)}
-            className={`rounded-md px-4 py-2 uppercase ${
-              tab === 3 ? "bg-blue-600 text-white" : "bg-gray-200"
+            className={`-mb-px border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
+              tab === 3
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-900"
             }`}
           >
-            Staff Attendance
+            Staff attendance
           </button>
           <button
             onClick={() => setTab(4)}
-            className={`rounded-md px-4 py-2 uppercase ${
-              tab === 4 ? "bg-blue-600 text-white" : "bg-gray-200"
+            className={`-mb-px border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
+              tab === 4
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-900"
             }`}
           >
             Payroll
           </button>
-        </Card>
+        </div>
 
         {/* Table */}
-        {tab === 1 && <AddStaff />}
-        {tab === 2 && <StaffList />}
-        {tab === 3 && <StaffAttendance />}
+        <div className="mt-4">
+          {tab === 2 && <StaffList />}
+          {tab === 3 && <StaffAttendance />}
+          {tab === 4 && (
+            <p className="p-4 text-gray-500">Payroll isn't built yet.</p>
+          )}
+        </div>
       </section>
 
       {/* Notification Panel */}

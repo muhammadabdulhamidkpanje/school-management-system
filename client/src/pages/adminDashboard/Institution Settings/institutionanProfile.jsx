@@ -7,12 +7,15 @@ import Input from "../../../components/inputs/input";
 import PrimaryButton from "../../../components/button/button";
 import Headings from "../../../UI/headings";
 import VerticalButton from "../../../UI/verticalButton";
-import FileInput from "../../../UI/fileInput";
+import FileInput from "../../../components/inputs/fileInput";
+import { MapPin } from "lucide-react";
+import Modal from "../../../UI/modal";
+import LocationComponent from "../../../components/location/location";
 
 
 export default function InstitutionProfile (){
     const {register} = useForm()
-    const [tab, setTab] = React.useState(1)
+    const [tab, setTab] = React.useState(2)
     return(
         <>
         <Headings className="text-xl font-semibold">Institutional settings</Headings>
@@ -83,9 +86,11 @@ function InstitutionCards() {
 function InstitutionInformationEdit() {
     const {register, handleSubmit, formState:{isSubmitting, success}} = useForm()
     const data1 = useSelector((state)=> state.auth)
+    const [institutionLogo, setInstitutionLogo] = React.useState(null)
 
     const onSubmit = async (data, e) => {
         console.log(data)
+        console.log('Selected institution logo:', institutionLogo)
         let Institution = {
             "name": data.institutionName,
             "email": data.institutionEmail,
@@ -137,12 +142,21 @@ function InstitutionInformationEdit() {
             />
             </div>
             <div className="flex gap-4">
-                <FileInput
-                label="institution logo"
-                name={"institution logo"}
-                onChange={{}} />
-                             
-                
+                <div className="w-[50%]">
+                  <FileInput
+                    fileType="image"
+                    label="Institution logo"
+                    name="institutionLogo"
+                    onChange={(e) => setInstitutionLogo(e.target.files?.[0] ?? null)}
+                    helperText="PNG, JPG, GIF or WEBP"
+                    maxSizeMB={5}
+                  />
+                </div>
+                <div className="w-[50%]">
+                  <LocationComponent onLocationChange={(coords) => {
+                    console.log("Selected coordinates:", coords);
+                  }} />
+                </div>
             </div>
             <PrimaryButton width="100%" className="w-full" type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Submitting..." : "Submit"}

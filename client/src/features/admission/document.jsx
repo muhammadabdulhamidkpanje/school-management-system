@@ -1,55 +1,36 @@
 import React, { useState } from "react";
-import { useDispatch,useSelector } from "react-redux";
-import { uploadDocument } from "./admissionSlice"; // Adjust the import path as necessary
-//import { ALLOWED_TYPES, MAX_FILE_SIZE_MB } from "./constants";
+import { useDispatch, useSelector } from "react-redux";
+import { uploadDocument } from "./admissionSlice";
+import FileInput from "../../components/inputs/fileInput"; // Adjust the import path as necessary
 
+const MAX_FILE_SIZE_MB = 2;
+const SCAN_TYPES = ".jpg,.jpeg,.png,.pdf";
 
-const fileLabels = {
-  passport: "Passport Photograph",
-  birthCert: "Birth Certificate",
-  schoolResult: "Previous School Result / Testimonial",
-  medicalReport: "Medical Report",
-  indigeneCert: "Indigene Certificate (optional)",
-  transferCert: "Transfer Certificate (if applicable)",
+// One place to describe each document: its label and which file types it accepts
+const documentFields = {
+  passport: { label: "Passport Photograph", fileType: "image" },
+  birthCert: { label: "Birth Certificate", accept: SCAN_TYPES },
+  schoolResult: { label: "Previous School Result / Testimonial", accept: SCAN_TYPES },
+  medicalReport: { label: "Medical Report", accept: SCAN_TYPES },
+  indigeneCert: { label: "Indigene Certificate (optional)", accept: SCAN_TYPES },
+  transferCert: { label: "Transfer Certificate (if applicable)", accept: SCAN_TYPES },
 };
 
 const DocumentUpload = () => {
-  const [previews, setPreviews] = useState({});
   const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
-  const fileLabels = {
-  passport: 'Passport Photograph',
-  birthCert: 'Birth Certificate',
-  schoolResult: 'Previous School Result / Testimonial',
-  medicalReport: 'Medical Report',
-  indigeneCert: 'Indigene Certificate (optional)',
-  transferCert: 'Transfer Certificate (if applicable)',
-};
+  const documents = useSelector((state) => state.admission.documents || {});
 
-const documents = useSelector((state) => state.admission.documents || {});
+  const setFieldError = (field, message) =>
+    setErrors((prev) => ({ ...prev, [field]: message }));
 
-
+  // FileInput already checks file type and size, so by the time a file
+  // reaches this handler it is valid. An empty selection means the file
+  // was removed or rejected.
   const handleFileChange = async (e, field) => {
     const file = e.target.files[0];
+    setFieldError(field, null);
     if (!file) return;
-
-    // ✅ Validate file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "Invalid file type (jpg, png, pdf allowed).",
-      }));
-      return;
-    }
-
-    // ✅ Validate file size
-    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "File is too large (max 2MB).",
-      }));
-      return;
-    }
 
     const formData = new FormData();
     formData.append("document", file);
@@ -60,30 +41,16 @@ const documents = useSelector((state) => state.admission.documents || {});
         method: "POST",
         body: formData,
       });
-
       const data = await res.json();
 
       if (res.ok) {
         dispatch(uploadDocument({ field, file: { name: file.name, url: data.url } }));
-
-        if (file.type.startsWith("image/")) {
-          setPreviews((prev) => ({
-            ...prev,
-            [field]: URL.createObjectURL(file),
-          }));
-        } else {
-          setPreviews((prev) => ({ ...prev, [field]: file.name }));
-        }
-
-        setErrors((prev) => ({ ...prev, [field]: null }));
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: data.error || "Upload failed.",
-        }));
+        setFieldError(field, data.error || "Upload failed.");
       }
     } catch (err) {
-      setErrors((prev) => ({ ...prev, [field]: "Upload failed." }));
+      console.error("Upload error:", err);
+      setFieldError(field, "Upload failed.");
     }
   };
 
@@ -92,18 +59,20 @@ const documents = useSelector((state) => state.admission.documents || {});
       <h2 className="mb-4 text-xl font-bold">Upload Documents</h2>
 
       <div className="space-y-4">
-        {Object.entries(fileLabels).map(([field, label]) => (
-          <div key={field} className="flex flex-col">
-            <label className="mb-1 font-medium">{label}</label>
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png,.pdf"
+        {Object.entries(documentFields).map(([field, { label, fileType, accept }]) => (
+          <div key={field}>
+            <FileInput
+              label={label}
+              name={field}
+              fileType={fileType}
+              accept={accept}
+              maxSizeMB={MAX_FILE_SIZE_MB}
+              error={errors[field]}
               onChange={(e) => handleFileChange(e, field)}
-              className="rounded border p-2"
             />
             {documents[field] && (
-              <span className="mt-1 text-sm text-green-600">
-                File selected: {documents[field].name}
+              <span className="text-sm text-green-600">
+                Uploaded: {documents[field].name}
               </span>
             )}
           </div>
