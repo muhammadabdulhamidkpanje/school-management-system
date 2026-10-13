@@ -1,0 +1,100 @@
+// ============================================================================
+// CORE AUTH MODULE
+// ============================================================================
+// Core authentication and authorization models
+// User accounts, roles, permissions, and access control
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+
+  roleId        String
+  role          Role     @relation(fields: [roleId], references: [id])
+
+  isActive      Boolean  @default(true)
+  isVerified    Boolean  @default(false)
+
+  lastLogin     DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  profile       UserProfile?
+
+  refreshTokens RefreshToken[]
+
+  auditLogs     AuditLog[]
+
+  passwordResets PasswordReset[]
+
+  emailVerifications EmailVerification[]
+
+  notifications Notification[]
+
+  students      Student[]
+
+  @@index([email])
+}
+
+model UserProfile {
+  id            String   @id @default(uuid())
+
+  userId        String   @unique
+
+  firstName     String
+  middleName    String?
+  lastName      String
+
+  gender        String?
+  phone         String?
+
+  profileImage  String?
+
+  createdAt     DateTime @default(now())
+
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+
+  name        String   @unique
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@index([name])
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+
+  name        String   @unique
+  description String?
+
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+
+  @@index([name])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role         Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}

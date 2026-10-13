@@ -1,0 +1,179 @@
+// ============================================================================
+// STUDENT MANAGEMENT MODULE
+// ============================================================================
+// Student records, enrollments, admissions, guardians, and academic profiles
+// Manages student lifecycle from admission through enrollment and graduation
+
+enum StudentStatus {
+  ACTIVE
+  GRADUATED
+  WITHDRAWN
+  SUSPENDED
+}
+
+enum AdmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+}
+
+enum GuardianRelationship {
+  FATHER
+  MOTHER
+  SIBLING
+  UNCLE
+  AUNT
+  GRANDPARENT
+  LEGAL_GUARDIAN
+  OTHER
+}
+
+model Student {
+  id            String        @id @default(cuid())
+  admissionNo   String        @unique
+  userId        String?       @unique // set once the student/parent portal account exists
+  user          User?         @relation(fields: [userId], references: [id])
+
+ firstName     String
+  lastName      String
+  middleName    String?
+  dob           DateTime
+  gender        String        // reuse the same convention as UserProfile.gender
+
+  classroomId   String?
+  classroom     Classroom?    @relation(fields: [classroomId], references: [id])
+
+  admissionDate DateTime      @default(now())
+  status        StudentStatus @default(ACTIVE)
+
+  admission     Admission?
+  enrollments   Enrollment[]
+  guardians     StudentGuardian[]
+  academicProfile StudentAcademicProfile?
+  attendanceRecords AttendanceRecord[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("students")
+  @@index([admissionNo])
+  @@index([userId])
+  @@index([classroomId])
+  @@index([status])
+}
+
+model StudentAcademicProfile {
+  id            String  @id @default(cuid())
+  studentId     String  @unique
+  student       Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  currentLevel  String?
+  admissionYear Int?
+  previousSchool String?
+  notes         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("student_academic_profiles")
+  @@index([studentId])
+}
+
+/// The application/intake record. A Student row is created (or linked)
+/// once an Admission is APPROVED — keeps the applicant funnel separate
+/// from confirmed enrollment.
+model Admission {
+  id              String          @id @default(cuid())
+  studentId       String?         @unique
+  student         Student?        @relation(fields: [studentId], references: [id])
+  sessionId       String
+  session         Session         @relation(fields: [sessionId], references: [id])
+  classroomId     String?
+
+  applicantFirstName String
+  applicantLastName  String
+  applicationDate    DateTime     @default(now())
+  status             AdmissionStatus @default(PENDING)
+  reviewedById       String?      // FK to Staff/User who approved/rejected
+  reviewedAt         DateTime?
+  remarks            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admissions")
+  @@index([studentId])
+  @@index([sessionId])
+  @@index([status])
+  @@index([applicationDate])
+}
+
+/// Per-session/semester registration — this is what drives promotion,
+/// repeat tracking, and "which classroom was this student in during
+/// Session X" history, independent of their current Student.classroomId.
+model Enrollment {
+  id          String           @id @default(cuid())
+  studentId   String
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classroomId String
+  classroom   Classroom        @relation(fields: [classroomId], references: [id])
+  sessionId   String
+  session     Session          @relation(fields: [sessionId], references: [id])
+  semesterId  String?
+  semester    Semester?        @relation(fields: [semesterId], references: [id])
+  status      EnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime         @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, sessionId, classroomId])
+  @@map("enrollments")
+  @@index([studentId])
+  @@index([classroomId])
+  @@index([sessionId])
+  @@index([status])
+}
+
+model Guardian {
+  id         String   @id @default(cuid())
+  firstName  String
+  lastName   String
+  phone      String
+  email      String?
+  address    String?
+  occupation String?
+
+  students StudentGuardian[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("guardians")
+  @@index([phone])
+  @@index([email])
+}
+
+/// Join model: a Student can have multiple Guardians (mother, father,
+/// legal guardian) and a Guardian can be linked to multiple Students
+/// (siblings) — isPrimary marks who gets contacted/billed by default.
+model StudentGuardian {
+  studentId    String
+  student      Student              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  guardianId   String
+  guardian     Guardian             @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+  relationship GuardianRelationship
+  isPrimary    Boolean              @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@id([studentId, guardianId])
+  @@map("student_guardians")
+  @@index([studentId])
+  @@index([guardianId])
+}

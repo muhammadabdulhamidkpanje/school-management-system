@@ -5,16 +5,10 @@ import Table from "../../../components/table/table";
 import Filter from "../../../components/filter/filter";
 import StudentFee from "../../../features/studentFees/studentFee";
 import StudentAttendance from "./studentAttendance";
-
-const sampleData = [
-  { name: "Abdulhamid", role: "Developer" },
-  { name: "Aisha", role: "Designer" },
-  { name: "Bashir", role: "Manager" },
-];
+import StudentList from "./studentList";
 
 export default function StudentManagement() {
   const [tab, setTab] = React.useState(1);
-  const [filtered, setFiltered] = React.useState(sampleData);
 
   const cards = [
     {
@@ -106,60 +100,6 @@ const admissionData = [
 
 function AdminAdmission() {
 
-  const [filtered, setFiltered] = React.useState(admissionData);
-  const [filterKey, setFilterKey] = React.useState("status");
-
-  const handleEdit = (id) => {
-    console.log("Edit student with ID:", id);
-  };
-  const handleDelete = (id) => {
-    console.log("Delete student with ID:", id);
-  };
-
-  return (
-    <div className="p-4">
-      <h1 className="py-2 text-3xl text-blue-600 uppercase">Admission</h1>
-
-      <Filter
-        data={admissionData}
-        options={filterOptions}
-        filterKey={filterKey}
-        setFilterKey={setFilterKey}
-        onFilter={setFiltered}
-      />
-
-      <Table data={filtered} className="min-w-full">
-        <Table.Header columns={["Name", "Email", "Status", "Actions"]} />
-        <Table.Body
-          renderRow={(item) => (
-            <>
-              <td className="px-4 py-2">{item.name}</td>
-              <td className="px-4 py-2">{item.email}</td>
-              <td className="px-4 py-2">{item.status}</td>
-              <td className="px-4 py-2">
-                <button
-                  className="text-blue-600 hover:underline"
-                  onClick={() => handleEdit(item.id)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="ml-2 text-red-600 hover:underline"
-                  onClick={() => handleDelete(item.id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </>
-          )}
-        />
-      </Table>
-    </div>
-  );
-}
-
-
-function StudentList() {
   const [filtered, setFiltered] = React.useState(admissionData);
   const [filterKey, setFilterKey] = React.useState("status");
 

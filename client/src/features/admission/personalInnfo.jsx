@@ -1,7 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateAdmissionForm } from "./admissionSlice"; // Adjust the import path as necessary
-import Input from "../../components/inputs/input";
+import { updateAdmissionForm } from "./admissionSlice";
 
 export default function PersonalInfoForm() {
   const dispatch = useDispatch();
@@ -19,83 +18,106 @@ export default function PersonalInfoForm() {
         <input
           type="text"
           name="firstName"
-          value={updateAdmissionForm.firstName}
+          value={personalInfo.firstName}
           onChange={handleChange}
           placeholder="First Name"
+          aria-label="First name"
+          autoComplete="given-name"
+          required
           className="rounded border p-2"
         />
         <input
           type="text"
           name="middleName"
-          value={updateAdmissionForm.middleName}
+          value={personalInfo.middleName}
           onChange={handleChange}
           placeholder="Middle Name"
+          aria-label="Middle name"
+          autoComplete="additional-name"
           className="rounded border p-2"
         />
         <input
           type="text"
           name="lastName"
-          value={updateAdmissionForm.lastName}
+          value={personalInfo.lastName}
           onChange={handleChange}
           placeholder="Last Name"
+          aria-label="Last name"
+          autoComplete="family-name"
+          required
           className="rounded border p-2"
         />
         <input
-          type="mail"
+          type="email"
           name="email"
-          value={updateAdmissionForm.email}
+          value={personalInfo.email}
           onChange={handleChange}
           placeholder="E-mail"
+          aria-label="Email"
+          autoComplete="email"
+          required
           className="rounded border p-2"
         />
         <input
           type="date"
           name="dateOfBirth"
-          value={updateAdmissionForm.dateOfBirth}
+          value={personalInfo.dateOfBirth}
           onChange={handleChange}
+          aria-label="Date of birth"
+          required
           className="rounded border p-2"
         />
         <select
           name="gender"
-          value={updateAdmissionForm.gender}
+          value={personalInfo.gender}
           onChange={handleChange}
+          aria-label="Gender"
+          required
           className="rounded border p-2"
         >
-          <option value="">Select Gender</option>
-          <option>Male</option>
-          <option>Female</option>
-          <option>Other</option>
+          <option value="">Select gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
         </select>
         <input
           type="text"
           name="nationality"
-          value={updateAdmissionForm.nationality}
+          value={personalInfo.nationality}
           onChange={handleChange}
           placeholder="Nationality"
+          aria-label="Nationality"
+          autoComplete="country-name"
+          required
           className="rounded border p-2"
         />
         <input
           type="text"
           name="stateOfOrigin"
-          value={updateAdmissionForm.stateOfOrigin}
+          value={personalInfo.stateOfOrigin}
           onChange={handleChange}
           placeholder="State of Origin"
+          aria-label="State of origin"
+          required
           className="rounded border p-2"
         />
         <input
           type="text"
           name="lga"
-          value={updateAdmissionForm.lga}
+          value={personalInfo.lga}
           onChange={handleChange}
           placeholder="Local Government Area (LGA)"
+          aria-label="Local Government Area"
+          required
           className="rounded border p-2"
         />
         <input
           type="text"
           name="religion"
-          value={updateAdmissionForm.religion}
+          value={personalInfo.religion}
           onChange={handleChange}
           placeholder="Religion"
+          aria-label="Religion"
           className="rounded border p-2"
         />
       </div>

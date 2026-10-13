@@ -1,170 +1,164 @@
-import React,{useState, useEffect} from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
-import pb from "../../../lib/pocketbase";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
+import api from "../../../lib/api";
+import { getErrorMessage } from "../../../lib/apiError";
+import { institutionProfileKeys } from "../../../lib/queryKeys";
+import * as academicApi from "../../../features/academic/academicApi";
 import Input from "../../../components/inputs/input";
 import PrimaryButton from "../../../components/button/button";
 import Headings from "../../../UI/headings";
-import VerticalButton from "../../../UI/verticalButton";
-import FileInput from "../../../components/inputs/fileInput";
-import { MapPin } from "lucide-react";
-import Modal from "../../../UI/modal";
-import LocationComponent from "../../../components/location/location";
 
-
-export default function InstitutionProfile (){
-    const {register} = useForm()
-    const [tab, setTab] = React.useState(2)
-    return(
-        <>
-        <Headings className="text-xl font-semibold">Institutional settings</Headings>
-         <div className="flex w-full flex-wrap justify-between gap-2">
-            <VerticalButton tab={tab} className="" setTab={setTab} data={[{label:"Institution cards", value:1},{label:"Institution Information Edit", value:2}]} onClick={setTab} />
-           <div className="sm:w-[73%] w-full sm:shadow p-4 shadow-xl ">
-            {tab === 1 && <InstitutionCards />}
-            {tab === 2 && <InstitutionInformationEdit />}
-           </div>
-           </div>
-        </>
-    )
-}
-
-function InstitutionCards() {
-  const [cards, setCards] = React.useState([]);
-
-  async function fetchInstitutionCards() {
-    const records = await pb.collection("institutionalProfile").getFullList({
-      sort: "-created",
-    });
-    setCards(records);
-  }
+export default function InstitutionProfile() {
+  const queryClient = useQueryClient();
+  const [logo, setLogo] = React.useState(null);
+  const profileQuery = useQuery({
+    queryKey: institutionProfileKeys.all,
+    queryFn: academicApi.getInstitutionProfile,
+  });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
   React.useEffect(() => {
-    fetchInstitutionCards();
-  }, []);
+    if (!profileQuery.data) return;
+    reset({
+      name: profileQuery.data.name ?? "",
+      email: profileQuery.data.email ?? "",
+      address: profileQuery.data.address ?? "",
+      phone: profileQuery.data.phone ?? "",
+      latitude: profileQuery.data.latitude ?? "",
+      longitude: profileQuery.data.longitude ?? "",
+    });
+  }, [profileQuery.data, reset]);
+
+  const saveMutation = useMutation({
+    mutationFn: async ({ logo: selectedLogo, ...payload }) => {
+      let logoUrl = profileQuery.data?.logoUrl ?? null;
+      if (selectedLogo) {
+        const body = new FormData();
+        body.append("file", selectedLogo);
+        const { data } = await api.post("/api/v1/uploads", body);
+        logoUrl = data.data.fileUrl;
+      }
+      return academicApi.updateInstitutionProfile({ ...payload, logoUrl });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: institutionProfileKeys.all });
+      setLogo(null);
+      toast.success("Institution profile saved");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+
+  const onSubmit = (values) =>
+    saveMutation.mutate({
+      logo,
+      name: values.name.trim(),
+      email: values.email || null,
+      address: values.address || null,
+      phone: values.phone || null,
+      latitude: values.latitude === "" ? null : Number(values.latitude),
+      longitude: values.longitude === "" ? null : Number(values.longitude),
+    });
+
+  if (profileQuery.isLoading) {
+    return <p className="p-4">Loading institution profile...</p>;
+  }
+
+  if (profileQuery.isError) {
+    return (
+      <div className="p-4 text-red-700">
+        <p>{getErrorMessage(profileQuery.error)}</p>
+        <button
+          type="button"
+          className="mt-2 underline"
+          onClick={() => profileQuery.refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 w-full">
-      <Headings className="text-lg font-semibold mb-6">
-        Institution Cards
+    <section>
+      <Headings className="text-xl font-semibold">
+        Institution profile
       </Headings>
-
-      <div className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card) => (
-          <div
-            key={card.id}
-            className="w-full bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="p-5">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                {card.name}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {card.address || "No address available"}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {card.email || "No email provided"}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {card.phone || "No phone number"}
-              </p>
-            </div>
-            <div className="px-5 pb-4">
-              <button className="w-full text-sm font-medium px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition">
-                View Details
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+      {profileQuery.data?.logoUrl && (
+        <img
+          src={profileQuery.data.logoUrl}
+          alt="Institution logo"
+          className="my-4 h-20 max-w-48 object-contain"
+        />
+      )}
+      {profileQuery.data && (
+        <div className="my-4 rounded border bg-gray-50 p-3 text-sm">
+          <p className="font-semibold">{profileQuery.data.name}</p>
+          <p>{profileQuery.data.address}</p>
+          <p>{profileQuery.data.email}</p>
+          <p>{profileQuery.data.phone}</p>
+        </div>
+      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
+        <Input
+          label="Institution name"
+          name="name"
+          placeholder="Institution name"
+          register={register}
+          rules={{ required: "Institution name is required" }}
+          error={errors.name}
+        />
+        <div className="flex flex-wrap gap-4">
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            className="min-w-48 flex-1"
+            register={register}
+            rules={{ pattern: { value: /^\S+@\S+\.\S+$/, message: "Enter a valid email address" } }}
+            error={errors.email}
+          />
+          <Input
+            label="Phone"
+            name="phone"
+            type="tel"
+            className="min-w-48 flex-1"
+            register={register}
+          />
+        </div>
+        <Input
+          label="Address"
+          name="address"
+          register={register}
+        />
+        <div className="flex flex-wrap gap-4">
+          <Input label="Latitude" name="latitude" type="number" className="min-w-40 flex-1" register={register} />
+          <Input label="Longitude" name="longitude" type="number" className="min-w-40 flex-1" register={register} />
+        </div>
+        <label className="mb-4 flex flex-col gap-2 text-sm font-semibold text-blue-600">
+          Institution logo
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            onChange={(event) => setLogo(event.target.files?.[0] ?? null)}
+          />
+          <span className="font-normal text-gray-500">JPEG, PNG, WEBP, or GIF; up to 20 MB</span>
+        </label>
+        <PrimaryButton
+          type="submit"
+          disabled={saveMutation.isPending}
+          className="w-full"
+        >
+          {saveMutation.isPending ? "Saving..." : "Save institution profile"}
+        </PrimaryButton>
+      </form>
+    </section>
   );
 }
-
-
-function InstitutionInformationEdit() {
-    const {register, handleSubmit, formState:{isSubmitting, success}} = useForm()
-    const data1 = useSelector((state)=> state.auth)
-    const [institutionLogo, setInstitutionLogo] = React.useState(null)
-
-    const onSubmit = async (data, e) => {
-        console.log(data)
-        console.log('Selected institution logo:', institutionLogo)
-        let Institution = {
-            "name": data.institutionName,
-            "email": data.institutionEmail,
-            "address": data.institutionAddress,
-            "phone": data.institutionPhone,
-            "createdBy": data1.user.id
-        }
-        const record = await pb.collection('institutionalProfile').create(Institution);
-
-        
-    }
-    return(
-        
-        <>
-        <Headings className="text-xl font-semibold">Institution Information Edit</Headings>
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="flex gap-4">
-            <Input
-                label={"Institution Name"}
-                name="institutionName"
-                placeholder="Enter institution name"
-                register={register}
-                className="w-[50%]"
-            />  
-            <Input
-                label={"Institution Email"}
-                name="institutionEmail"
-                placeholder="Enter institution email"
-                register={register}
-                className="w-[50%]"
-                type="email"
-            />
-            </div>
-            <div className="flex gap-4">
-            <Input
-                label={"Institution Address"}
-                name="institutionAddress"
-                placeholder="Enter institution address"
-                register={register}
-                className="w-[50%]"
-            />
-            <Input
-                label={"Institution Phone"}
-                name="institutionPhone"
-                placeholder="Enter institution phone"
-                register={register}
-                className="w-[50%]"
-                type="tel"
-            />
-            </div>
-            <div className="flex gap-4">
-                <div className="w-[50%]">
-                  <FileInput
-                    fileType="image"
-                    label="Institution logo"
-                    name="institutionLogo"
-                    onChange={(e) => setInstitutionLogo(e.target.files?.[0] ?? null)}
-                    helperText="PNG, JPG, GIF or WEBP"
-                    maxSizeMB={5}
-                  />
-                </div>
-                <div className="w-[50%]">
-                  <LocationComponent onLocationChange={(coords) => {
-                    console.log("Selected coordinates:", coords);
-                  }} />
-                </div>
-            </div>
-            <PrimaryButton width="100%" className="w-full" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit"}
-            </PrimaryButton>
-        </form>
-
-        </>
-    )
-}
-
-

@@ -1,0 +1,92 @@
+// ============================================================================
+// COURSE DELIVERY MODULE
+// ============================================================================
+// Course offerings, attendance tracking, and staff management
+// Represents actual course instances, attendance sessions, and instructor details
+
+model Staff {
+  id             String   @id @default(cuid())
+  employeeNo     String   @unique
+  firstName      String
+  lastName       String
+  email          String?  @unique
+  phone          String?
+  designation    String?
+  employmentDate DateTime?
+  isActive       Boolean  @default(true)
+
+  courseOfferings CourseOffering[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("staff")
+  @@index([employeeNo])
+  @@index([email])
+  @@index([isActive])
+}
+
+/// Represents a specific course offering in a semester.
+/// Ties together: Subject + Classroom + Semester + Teacher
+/// This is the actual unit that attendance/results attach to.
+model CourseOffering {
+  id          String    @id @default(cuid())
+  subjectId   String
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  classroomId String
+  classroom   Classroom @relation(fields: [classroomId], references: [id])
+  semesterId  String
+  semester    Semester  @relation(fields: [semesterId], references: [id])
+  teacherId   String?
+  teacher     Staff?    @relation(fields: [teacherId], references: [id])
+  attendanceSessions AttendanceSession[]
+  assessments Assessment[]
+  exams       Exam[]
+  creditUnit  Int       @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([subjectId, classroomId, semesterId])
+  @@map("course_offerings")
+  @@index([subjectId])
+  @@index([classroomId])
+  @@index([semesterId])
+  @@index([teacherId])
+}
+
+model AttendanceSession {
+  id              String         @id @default(cuid())
+  classroomId     String
+  classroom       Classroom      @relation(fields: [classroomId], references: [id])
+  courseOfferingId String?
+  courseOffering  CourseOffering? @relation(fields: [courseOfferingId], references: [id])
+  sessionDate     DateTime
+  topic           String?
+
+  records   AttendanceRecord[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([classroomId, sessionDate])
+  @@index([courseOfferingId])
+  @@map("attendance_sessions")
+}
+
+model AttendanceRecord {
+  id                  String            @id @default(cuid())
+  attendanceSessionId String
+  attendanceSession   AttendanceSession @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)
+  studentId           String
+  student             Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  present             Boolean           @default(false)
+  note                String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([attendanceSessionId, studentId])
+  @@map("attendance_records")
+  @@index([studentId])
+  @@index([attendanceSessionId])
+}

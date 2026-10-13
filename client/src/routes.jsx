@@ -6,7 +6,7 @@ import ProtectedRoute from "./routes/protectedRoute";
 
 import Home from "./pages";
 import AuthPage from "./pages/auth";
-import Login from "./features/auth/logIn";
+import Login from "./features/auth/login";
 import Admission from "./pages/admission";
 
 import StudentDashboardLayout from "./layouts/studentDashboard/studentDashboard";
@@ -23,6 +23,8 @@ import CourseManagement from "./pages/adminDashboard/courseManagement/courseMana
 import TimeTableAndSchedules from "./pages/adminDashboard/timeTable and schedules/timeTableAndSchedules";
 import InstitutionSettings from "./pages/adminDashboard/Institution Settings/insInstitutionSettings";
 import AddStaff from "./features/addstaff/addStaff";
+import AdmissionsManagement from "./pages/adminDashboard/admissions";
+import AdmissionStatus from "./features/admission/status";
 
 import LoadingSpinner from "./UI/spinner";
 import ContactUS from "./pages/contact";
@@ -36,6 +38,7 @@ const AppRoutes = () => {
         <Route element={<PagesLayout />}>
           <Route index element={<Home />} />
           <Route path="/admission" element={<Admission />} />
+          <Route path="/admission/status/:id" element={<AdmissionStatus />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/login" element={<Login />} />
           <Route path="*" element={<h1>Page Not Found</h1>} />
@@ -66,6 +69,10 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route element={<AdminDashboardLayout />}>
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route
+              path="/admin-dashboard/admissions"
+              element={<AdmissionsManagement />}
+            />
             <Route
               path="/admin-dashboard/timetable-and-schedules"
               element={<TimeTableAndSchedules />}

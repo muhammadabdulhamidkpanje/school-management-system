@@ -1,24 +1,33 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
+import { Eye, EyeOff } from "lucide-react";
+
 import { authLogin } from "./authSlice";
 import { login as loginRequest } from "./authApi";
-import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [disabled, setDisabled] = useState(false);
+
   const dispatch = useDispatch();
 
-  // redux-persist already rehydrates this from storage, so if a valid
-  // session exists we redirect without hitting the network.
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector(
+    (state) => state.auth
+  );
 
-  const { handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   function determineRedirectUrl(roleName) {
     switch (roleName) {
@@ -33,22 +42,40 @@ export default function Login() {
     }
   }
 
-  const onSubmit = async () => {
+  const onSubmit = async (formData) => {
     setError("");
-    setDisabled(true);
+
     try {
-      // { accessToken, user } — see authApi.login() / auth.controller.ts login()
-      const result = await loginRequest(email, password);
+      const result = await loginRequest(
+        formData.email.trim(),
+        formData.password
+      );
+
+      if (!result?.accessToken || !result?.user) {
+        throw new Error(
+          "Invalid login response from the server."
+        );
+      }
+
       dispatch(authLogin(result));
     } catch (err) {
-      // Backend error shape: { success: false, message, errors } (utils/response.ts)
-      setError(err.response?.data?.message ?? "Something went wrong. Please try again.");
-      setDisabled(false);
+      console.error("Login error:", err);
+
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Something went wrong. Please try again."
+      );
     }
   };
 
   if (isAuthenticated && user) {
-    return <Navigate to={determineRedirectUrl(user.role?.name)} />;
+    return (
+      <Navigate
+        to={determineRedirectUrl(user.role?.name)}
+        replace
+      />
+    );
   }
 
   return (
@@ -64,17 +91,31 @@ export default function Login() {
 
       {/* Right Side Form */}
       <div className="flex w-full items-center justify-center p-6 md:w-1/2">
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="w-full max-w-md space-y-6"
+        >
+          {/* Heading */}
           <div>
-            <h2 className="text-3xl font-bold text-blue-500 uppercase">
+            <h2 className="text-3xl font-bold uppercase text-blue-500">
               Welcome back!
             </h2>
+
             <p className="text-xl text-gray-600">
               Please enter your email and password to login.
             </p>
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {/* Error Message */}
+          {error && (
+            <div
+              role="alert"
+              className="rounded-md bg-red-50 p-3 text-sm text-red-600"
+            >
+              {error}
+            </div>
+          )}
 
           {/* Email Input */}
           <div>
@@ -84,19 +125,38 @@ export default function Login() {
             >
               Email
             </label>
+
             <input
               id="email"
               type="email"
-              name="email"
               autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={
+                errors.email ? "email-error" : undefined
+              }
+              disabled={isSubmitting}
+              {...register("email", {
+                required: "Email is required.",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Please enter a valid email address.",
+                },
+              })}
+              className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             />
+
+            {errors.email && (
+              <p
+                id="email-error"
+                className="mt-1 text-sm text-red-500"
+              >
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
-          {/* Password Input with toggle */}
+          {/* Password Input */}
           <div>
             <label
               htmlFor="password"
@@ -104,40 +164,69 @@ export default function Login() {
             >
               Password
             </label>
+
             <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                name="password"
                 autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full rounded-md border border-gray-300 p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={
+                  errors.password
+                    ? "password-error"
+                    : undefined
+                }
+                disabled={isSubmitting}
+                {...register("password", {
+                  required: "Password is required.",
+                })}
+                className="w-full rounded-md border border-gray-300 p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               />
+
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() =>
+                  setShowPassword((previous) => !previous)
+                }
+                aria-label={
+                  showPassword ? "Hide password" : "Show password"
+                }
+                aria-pressed={showPassword}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
               </button>
             </div>
+
+            {errors.password && (
+              <p
+                id="password-error"
+                className="mt-1 text-sm text-red-500"
+              >
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
+            disabled={isSubmitting}
             className={`w-full rounded-md px-4 py-2 text-white transition duration-200 ${
-              disabled
+              isSubmitting
                 ? "cursor-not-allowed bg-blue-300"
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
-            disabled={!email || !password || disabled}
           >
-            {disabled ? "Logging in..." : "Login"}
+            {isSubmitting ? "Logging in..." : "Login"}
           </button>
 
+          {/* Sign Up */}
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
             <span className="cursor-pointer text-blue-600 hover:underline">

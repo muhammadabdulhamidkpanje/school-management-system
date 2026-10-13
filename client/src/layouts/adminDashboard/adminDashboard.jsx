@@ -5,15 +5,30 @@ import Main from "../../UI/Main";
 import DashboardNav from "../../components/navBar/DashboardNav/dashboardnav";
 import Footer from "../../components/footer/footer";
 import SideNav from "../../components/navBar/DashboardNav/sideNav";
-import { Home, CalendarClock, Users, GraduationCap, Book, Settings, BookMarked } from "lucide-react";
+import {
+  Home,
+  CalendarClock,
+  Users,
+  GraduationCap,
+  Book,
+  Settings,
+  BookMarked,
+  ClipboardList,
+} from "lucide-react";
 
 
 
-  let items = [
+  const navigationItems = [
     {
       path: "/",
       name: "Dashboard",
       icon: <Home size={26} />,
+    },
+    {
+      path: "/admissions",
+      name: "Admissions",
+      icon: <ClipboardList size={26} />,
+      group: "People",
     },
     {
       path: "/Staff-Management",
@@ -56,13 +71,10 @@ import { Home, CalendarClock, Users, GraduationCap, Book, Settings, BookMarked }
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    items = items.map((item) => ({
-       path: `admin-dashboard${item.path}`,
-        name: item.name,
-        icon: item.icon,
-        group: item.group,
-    }
-    ))
+    const items = navigationItems.map((item) => ({
+      ...item,
+      path: `/admin-dashboard${item.path}`,
+    }));
     return (
       <div className="flex h-full">
         <SideNav setSidebarOpen={setSidebarOpen} items={items} className={`max-h-full ${sidebarOpen ? "block" : "hidden"}`} />
@@ -76,5 +88,4 @@ export default function AdminDashboard() {
       </div>
     );
 }
-
 

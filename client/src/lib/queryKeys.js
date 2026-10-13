@@ -15,6 +15,40 @@ export const departmentKeys = {
   list: (params) => ["departments", "list", params],
 };
 
+export const sessionKeys = {
+  all: ["sessions"],
+  list: (params) => ["sessions", "list", params],
+};
+
+export const semesterKeys = {
+  all: ["semesters"],
+  list: (params) => ["semesters", "list", params],
+};
+
+export const institutionProfileKeys = {
+  all: ["institution-profile"],
+};
+
+export const gradingSystemKeys = {
+  all: ["grading-systems"],
+};
+
+export const academicCalendarKeys = {
+  all: ["academic-calendars"],
+  list: (params) => ["academic-calendars", "list", params],
+};
+
+export const studentKeys = {
+  all: ["students"],
+  list: (params) => ["students", "list", params],
+};
+
+export const staffKeys = {
+  all: ["staff"],
+  list: (params) => ["staff", "list", params],
+  detail: (id) => ["staff", "detail", id],
+};
+
 // Dashboard / stat-card totals (GET /<resource>?limit=1 -> pagination.total).
 // Any create or delete of a counted resource should invalidate `countKeys.all`.
 export const countKeys = {

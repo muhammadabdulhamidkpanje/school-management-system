@@ -1,0 +1,63 @@
+// ============================================================================
+// RESULTS MODULE
+// ============================================================================
+// Academic assessment and examination setup for course offerings.
+
+enum AssessmentType {
+  TEST
+  QUIZ
+  ASSIGNMENT
+  PROJECT
+  EXAM
+  PRESENTATION
+  OTHER
+}
+
+enum ExamType {
+  QUIZ
+  MIDTERM
+  FINAL
+  PRACTICAL
+  ORAL
+  OTHER
+}
+
+model Assessment {
+  id             String          @id @default(cuid())
+  courseOfferingId String
+  courseOffering CourseOffering  @relation(fields: [courseOfferingId], references: [id], onDelete: Cascade)
+  title          String
+  type           AssessmentType  @default(TEST)
+  weight         Int             @default(0)
+  maxMarks       Int             @default(100)
+  dueDate        DateTime?
+  isPublished    Boolean         @default(false)
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([courseOfferingId, title])
+  @@map("assessments")
+  @@index([courseOfferingId])
+  @@index([type])
+}
+
+model Exam {
+  id             String          @id @default(cuid())
+  courseOfferingId String
+  courseOffering CourseOffering  @relation(fields: [courseOfferingId], references: [id], onDelete: Cascade)
+  title          String
+  examType       ExamType        @default(FINAL)
+  date           DateTime
+  durationMinutes Int             @default(60)
+  totalMarks     Int             @default(100)
+  venue          String?
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([courseOfferingId, title])
+  @@map("exams")
+  @@index([courseOfferingId])
+  @@index([examType])
+}

@@ -1,0 +1,131 @@
+// ============================================================================
+// ACADEMIC STRUCTURE MODULE
+// ============================================================================
+// Faculty, departments, sessions, semesters, classrooms, subjects, and courses
+// Defines the organizational hierarchy of the academic system
+
+model Faculty {
+  id          String       @id @default(cuid())
+  name        String
+  code        String       @unique
+  departments Department[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faculties")
+  @@index([code])
+}
+
+model Department {
+  id       String  @id @default(cuid())
+  name     String
+  code     String  @unique
+  facultyId String?
+  faculty  Faculty? @relation(fields: [facultyId], references: [id])
+
+  subjects   Subject[]
+  courses    Course[]
+  classrooms Classroom[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("departments")
+  @@index([code])
+  @@index([facultyId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g. "2025/2026"
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+
+  semesters   Semester[]
+  admissions  Admission[]
+  enrollments Enrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sessions")
+  @@index([isCurrent])
+  @@index([startDate])
+}
+
+model Semester {
+  id        String   @id @default(cuid())
+  name      String   // e.g. "First Term"
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+
+  enrollments     Enrollment[]
+  courseOfferings CourseOffering[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sessionId, name])
+  @@map("semesters")
+  @@index([sessionId])
+  @@index([isCurrent])
+}
+
+model Classroom {
+  id           String      @id @default(cuid())
+  name         String      // e.g. "JSS1A", "SS2 Science B"
+  level        String      // e.g. "JSS1", "SS2" — used for grouping/promotion
+  capacity     Int?
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  classTeacherId String?   // FK to Staff once that module exists
+
+  students        Student[]
+  enrollments     Enrollment[]
+  courseOfferings CourseOffering[]
+  attendanceSessions AttendanceSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
+  @@map("classrooms")
+  @@index([level])
+  @@index([departmentId])
+}
+
+model Subject {
+  id           String      @id @default(cuid())
+  name         String
+  code         String      @unique
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  courseOfferings CourseOffering[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subjects")
+  @@index([code])
+  @@index([departmentId])
+}
+
+model Course {
+  id           String      @id @default(cuid())
+  name         String
+  code         String      @unique
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("courses")
+  @@index([code])
+  @@index([departmentId])
+}

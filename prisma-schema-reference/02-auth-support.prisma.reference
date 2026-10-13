@@ -1,0 +1,79 @@
+// ============================================================================
+// AUTH SUPPORT MODULE
+// ============================================================================
+// Supporting models for authentication, security, and auditing
+// Refresh tokens, password resets, audit logs, email verification
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+
+  token       String   @db.Text
+
+  expiresAt   DateTime
+
+  revoked     Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+
+  userId      String
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model PasswordReset {
+  id          String   @id @default(uuid())
+
+  token       String
+
+  expiresAt   DateTime
+
+  used        Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+
+  userId      String
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+
+  action      String
+
+  tableName   String?
+
+  recordId    String?
+
+  ipAddress   String?
+
+  createdAt   DateTime @default(now())
+
+  userId      String
+
+  user        User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tableName])
+  @@index([createdAt])
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
