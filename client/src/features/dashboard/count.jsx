@@ -1,4 +1,5 @@
 import React from "react";
+import LoadingButton from "../../components/button/loadingButton";
 import { useCount } from "./useCount";
 
 /**
@@ -12,6 +13,16 @@ import { useCount } from "./useCount";
  */
 export default function Count({ resource, params }) {
   const { data, isLoading, isError, refetch } = useCount(resource, params);
+  const [retrying, setRetrying] = React.useState(false);
+
+  async function retry() {
+    setRetrying(true);
+    try {
+      await refetch();
+    } finally {
+      setRetrying(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -25,14 +36,16 @@ export default function Count({ resource, params }) {
 
   if (isError) {
     return (
-      <button
+      <LoadingButton
         type="button"
-        onClick={() => refetch()}
+        onClick={retry}
+        isLoading={retrying}
+        loadingText="Retrying..."
         title="Couldn't load this number. Click to retry."
         className="text-gray-400 transition hover:text-blue-500"
       >
         —
-      </button>
+      </LoadingButton>
     );
   }
 

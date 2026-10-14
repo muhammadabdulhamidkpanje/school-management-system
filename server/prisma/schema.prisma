@@ -409,6 +409,8 @@ model Course {
   departmentId String?
   department   Department? @relation(fields: [departmentId], references: [id])
 
+  courseOfferings CourseOffering[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -480,8 +482,10 @@ model StaffPrivateData {
 
 model CourseOffering {
   id                 String              @id @default(cuid())
-  subjectId          String
-  subject            Subject             @relation(fields: [subjectId], references: [id])
+  courseId           String?
+  course             Course?             @relation(fields: [courseId], references: [id])
+  subjectId          String?
+  subject            Subject?            @relation(fields: [subjectId], references: [id], onDelete: Restrict)
   classroomId        String
   classroom          Classroom           @relation(fields: [classroomId], references: [id])
   semesterId         String
@@ -496,7 +500,9 @@ model CourseOffering {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([courseId, classroomId, semesterId])
   @@unique([subjectId, classroomId, semesterId])
+  @@index([courseId])
   @@index([subjectId])
   @@index([classroomId])
   @@index([semesterId])
@@ -662,6 +668,7 @@ model Admission {
   applicantMiddleName String?
   applicantLastName   String
   email               String?
+  applicantPhone      String?
   dateOfBirth         DateTime?
   gender              String?
   nationality         String?

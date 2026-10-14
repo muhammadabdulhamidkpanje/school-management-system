@@ -59,6 +59,17 @@ export default function PersonalInfoForm() {
           className="rounded border p-2"
         />
         <input
+          type="tel"
+          name="phone"
+          value={personalInfo.phone}
+          onChange={handleChange}
+          placeholder="Phone number"
+          aria-label="Phone number (used as the initial password)"
+          autoComplete="tel"
+          required
+          className="rounded border p-2"
+        />
+        <input
           type="date"
           name="dateOfBirth"
           value={personalInfo.dateOfBirth}

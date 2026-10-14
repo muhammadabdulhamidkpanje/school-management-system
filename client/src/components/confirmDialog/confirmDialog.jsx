@@ -31,9 +31,10 @@ export default function ConfirmDialog({
           <PrimaryButton
             variant="danger"
             onClick={onConfirm}
-            disabled={isLoading}
+            isLoading={isLoading}
+            loadingText={loadingLabel}
           >
-            {isLoading ? loadingLabel : confirmLabel}
+            {confirmLabel}
           </PrimaryButton>
         </>
       }

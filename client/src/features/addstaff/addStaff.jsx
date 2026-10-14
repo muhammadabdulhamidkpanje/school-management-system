@@ -327,8 +327,8 @@ export default function AddStaff() {
               {step === 5 ? "Review details" : "Next"}
             </PrimaryButton>
           ) : (
-            <PrimaryButton type="submit" disabled={submitting}>
-              {submitting ? "Adding staff..." : "Add Staff"}
+            <PrimaryButton type="submit" isLoading={submitting} loadingText="Adding staff...">
+              Add Staff
             </PrimaryButton>
           )}
         </div>
@@ -555,17 +555,17 @@ function StaffDepartment({ departmentData, setDepartmentData, errors }) {
       {faculties.isError && (
         <div role="alert" className="w-full text-sm text-red-700">
           {getErrorMessage(faculties.error, "Couldn't load faculties.")}
-          <button type="button" onClick={() => faculties.refetch()} className="ml-2 underline">
+          <PrimaryButton type="button" onClick={() => faculties.refetch()} isLoading={faculties.isFetching} loadingText="Retrying..." className="ml-2 underline">
             Try again
-          </button>
+          </PrimaryButton>
         </div>
       )}
       {departments.isError && (
         <div role="alert" className="w-full text-sm text-red-700">
           {getErrorMessage(departments.error, "Couldn't load departments.")}
-          <button type="button" onClick={() => departments.refetch()} className="ml-2 underline">
+          <PrimaryButton type="button" onClick={() => departments.refetch()} isLoading={departments.isFetching} loadingText="Retrying..." className="ml-2 underline">
             Try again
-          </button>
+          </PrimaryButton>
         </div>
       )}
       {!departments.isLoading && !departments.isError && departmentRecords.length === 0 && (

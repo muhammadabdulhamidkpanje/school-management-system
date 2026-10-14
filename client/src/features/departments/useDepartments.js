@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getErrorMessage } from "../../lib/apiError";
-import { countKeys, departmentKeys, facultyKeys } from "../../lib/queryKeys";
+import { countKeys, courseKeys, departmentKeys, facultyKeys } from "../../lib/queryKeys";
 import * as departmentApi from "./departmentApi";
 
 export { departmentKeys };
@@ -26,6 +26,7 @@ function useInvalidate() {
   return () => {
     queryClient.invalidateQueries({ queryKey: departmentKeys.all });
     queryClient.invalidateQueries({ queryKey: facultyKeys.all });
+    queryClient.invalidateQueries({ queryKey: courseKeys.all });
     queryClient.invalidateQueries({ queryKey: countKeys.all });
   };
 }

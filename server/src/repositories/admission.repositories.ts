@@ -16,6 +16,12 @@ const admissionDetailInclude = {
 export const findSessionForAdmission = (id: string) =>
   prisma.session.findUnique({ where: { id } });
 
+export const findUserByEmail = (email: string) =>
+  prisma.user.findUnique({ where: { email }, select: { id: true } });
+
+export const findRoleByName = (name: string) =>
+  prisma.role.findUnique({ where: { name }, select: { id: true } });
+
 export const listPublicAdmissionSessions = () =>
   prisma.session.findMany({
     where: { admissionsOpen: true },
@@ -247,6 +253,16 @@ export const rejectAdmission = (id: string, reason: string, changedBy: string) =
 
 export const enrollAdmission = (input: {
   id: string;
+  user: {
+    email: string;
+    passwordHash: string;
+    roleId: string;
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+    phone: string;
+    dateOfBirth: Date;
+  };
   student: Prisma.StudentCreateInput;
   classId: string;
   sessionId: string;
@@ -256,7 +272,27 @@ export const enrollAdmission = (input: {
     where: { id: input.id, status: 'APPROVED', studentId: null, sessionId: input.sessionId },
   });
   if (!admission) return null;
-  const student = await transaction.student.create({ data: input.student });
+  const user = await transaction.user.create({
+    data: {
+      email: input.user.email,
+      passwordHash: input.user.passwordHash,
+      isVerified: true,
+      role: { connect: { id: input.user.roleId } },
+      profile: {
+        create: {
+          firstName: input.user.firstName,
+          ...(input.user.middleName !== undefined && { middleName: input.user.middleName }),
+          lastName: input.user.lastName,
+          phone: input.user.phone,
+          dateOfBirth: input.user.dateOfBirth,
+        },
+      },
+    },
+    select: { id: true },
+  });
+  const student = await transaction.student.create({
+    data: { ...input.student, user: { connect: { id: user.id } } },
+  });
   const enrollment = await transaction.enrollment.create({
     data: {
       admission: { connect: { id: input.id } },
@@ -267,7 +303,7 @@ export const enrollAdmission = (input: {
   });
   const updated = await transaction.admission.update({
     where: { id: input.id },
-    data: { status: 'ENROLLED', student: { connect: { id: student.id } } },
+    data: { status: 'ENROLLED', studentId: student.id },
     omit: { applicantTokenHash: true },
   });
   await transaction.admissionStatusHistory.create({

@@ -10,4 +10,7 @@ if (!connectionString) {
 
 const adapter = new PrismaPg({ connectionString });
 
-export default new PrismaClient({ adapter });
+export default new PrismaClient({
+  adapter,
+  transactionOptions: { maxWait: 10000, timeout: 50000 },
+});

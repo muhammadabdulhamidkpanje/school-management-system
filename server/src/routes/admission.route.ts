@@ -47,6 +47,7 @@ router.get('/options/classes', validate(admissionClassOptionsSchema), AdmissionC
 router.post('/', validateAdmissionSubmission, AdmissionController.submit);
 
 router.get('/', ...canRead, validate(admissionListSchema), AdmissionController.list);
+router.get('/:id/class-options', ...canRead, validate(admissionIdSchema), AdmissionController.classroomsForAdmission);
 router.get('/:id', applicantOrAdminRead, validate(admissionIdSchema), AdmissionController.get);
 router.get('/:id/status', validate(admissionIdSchema), AdmissionController.status);
 router.get('/:id/information-requests', validate(admissionIdSchema), AdmissionController.informationRequests);

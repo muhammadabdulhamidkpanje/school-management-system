@@ -23,6 +23,7 @@ export const listStudents = async (page: number, limit: number, search?: string,
       { admissionNo: { contains: search, mode: 'insensitive' as const } },
       { firstName: { contains: search, mode: 'insensitive' as const } },
       { lastName: { contains: search, mode: 'insensitive' as const } },
+      { user: { is: { email: { contains: search, mode: 'insensitive' as const } } } },
     ] }),
   };
   const [students, total] = await StudentRepo.listStudents((page - 1) * limit, limit, where);
@@ -72,16 +73,36 @@ export const exportStudents = async () => {
 export const importStudents = async (csv: string, actorId: string, ipAddress?: string) => {
   const rows = parseCsv(csv);
   const required = ['admissionNo', 'firstName', 'lastName', 'dob', 'gender'];
-  if (rows.some(row => required.some(field => !row[field]))) throw new BadRequestError(`CSV requires columns: ${required.join(', ')}`);
   const students = [];
-  for (const row of rows) {
+  for (const [index, row] of rows.entries()) {
+    const admissionNo = row.admissionNo;
+    const firstName = row.firstName;
+    const lastName = row.lastName;
+    const dob = row.dob;
+    const gender = row.gender;
+    if (!admissionNo || !firstName || !lastName || !dob || !gender) {
+      throw new BadRequestError(
+        `CSV row ${index + 2} requires columns: ${required.join(', ')}`,
+      );
+    }
+    const parsedDate = new Date(dob);
+    if (Number.isNaN(parsedDate.getTime())) {
+      throw new BadRequestError(`CSV row ${index + 2} has an invalid date of birth`);
+    }
+    if (!['male', 'female', 'other'].includes(gender)) {
+      throw new BadRequestError(`CSV row ${index + 2} has an invalid gender`);
+    }
+    const middleName = row.middleName?.trim();
+    if (middleName && middleName.length < 2) {
+      throw new BadRequestError(`CSV row ${index + 2} has an invalid middle name`);
+    }
     students.push(await createStudent({
-      admissionNo: row.admissionNo,
-      firstName: row.firstName,
-      lastName: row.lastName,
-      ...(row.middleName && { middleName: row.middleName }),
-      dob: row.dob,
-      gender: row.gender,
+      admissionNo,
+      firstName,
+      lastName,
+      ...(middleName && { middleName }),
+      dob: parsedDate.toISOString(),
+      gender,
       ...(row.classroomId && { classroomId: row.classroomId }),
     }, actorId, ipAddress));
   }

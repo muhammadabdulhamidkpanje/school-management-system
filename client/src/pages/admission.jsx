@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import LoadingButton from "../components/button/loadingButton";
 import DocumentUpload from "../features/admission/document";
 import PersonalInfoForm from "../features/admission/personalInnfo";
 import ResultsSection from "../features/admission/result";
@@ -23,6 +24,7 @@ const validateStep = (step, admission) => {
       "firstName",
       "lastName",
       "email",
+      "phone",
       "dateOfBirth",
       "gender",
       "nationality",
@@ -137,6 +139,7 @@ const makeSubmissionPayload = (admission) => ({
   middleName: admission.middleName?.trim() || undefined,
   lastName: admission.lastName.trim(),
   email: admission.email.trim(),
+  phone: admission.phone.trim(),
   dateOfBirth: admission.dateOfBirth,
   gender: admission.gender,
   nationality: admission.nationality.trim(),
@@ -324,14 +327,15 @@ export default function Admission() {
               Next
             </button>
           ) : (
-            <button
+            <LoadingButton
               type="button"
               onClick={handleSubmit}
-              disabled={admission.status === "loading"}
+              isLoading={admission.status === "loading"}
+              loadingText="Submitting..."
               className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:cursor-wait disabled:opacity-50"
             >
-              {admission.status === "loading" ? "Submitting..." : "Submit application"}
-            </button>
+              Submit application
+            </LoadingButton>
           )}
         </div>
       </div>

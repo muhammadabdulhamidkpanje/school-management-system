@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { LoaderCircle } from "lucide-react";
 
 // Tailwind only generates classes it can see as complete strings, so the old
 // `bg-${bg}` template never reliably worked. Variants are spelled out instead.
@@ -11,6 +12,7 @@ const variants = {
   secondary:
     "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-400",
   danger: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
+  unstyled: "",
 };
 
 /**
@@ -27,6 +29,9 @@ export default function PrimaryButton({
   className = "",
   style,
   children,
+  disabled = false,
+  isLoading = false,
+  loadingText = "Loading...",
   // eslint-disable-next-line no-unused-vars
   color,
   // eslint-disable-next-line no-unused-vars
@@ -35,14 +40,28 @@ export default function PrimaryButton({
   hoverBg,
   ...rest
 }) {
+  const baseClasses =
+    variant === "unstyled"
+      ? "inline-flex items-center justify-center gap-2 transition disabled:cursor-not-allowed disabled:opacity-60"
+      : base;
+
   return (
     <button
       type={type}
-      className={clsx(base, variants[variant] ?? variants.primary, className)}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading}
+      className={clsx(baseClasses, variants[variant] ?? variants.primary, className)}
       style={{ width, height, ...style }}
       {...rest}
     >
-      {children}
+      {isLoading && (
+        <LoaderCircle
+          aria-hidden="true"
+          size={16}
+          className="shrink-0 animate-spin"
+        />
+      )}
+      {isLoading ? loadingText : children}
     </button>
   );
 }

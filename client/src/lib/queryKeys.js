@@ -38,9 +38,23 @@ export const academicCalendarKeys = {
   list: (params) => ["academic-calendars", "list", params],
 };
 
+export const courseKeys = {
+  all: ["courses"],
+  list: (params) => ["courses", "list", params],
+  detail: (id) => ["courses", "detail", id],
+};
+
+export const courseOfferingKeys = {
+  all: ["course-offerings"],
+  list: (params) => ["course-offerings", "list", params],
+};
+
 export const studentKeys = {
   all: ["students"],
   list: (params) => ["students", "list", params],
+  detail: (id) => ["students", "detail", id],
+  academicProfile: (id) => ["students", "academic-profile", id],
+  classrooms: ["classrooms", "student-options"],
 };
 
 export const staffKeys = {

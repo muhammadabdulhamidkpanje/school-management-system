@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import LoadingButton from "../../components/button/loadingButton";
 import api from "../../lib/api";
 import { getErrorMessage } from "../../lib/apiError";
 import FileInput from "../../components/inputs/fileInput";
@@ -13,6 +14,15 @@ const DOCUMENT_TYPES = [
   "INDIGENE_CERTIFICATE",
   "TRANSFER_CERTIFICATE",
 ];
+const applicantHeaders = (id) => {
+  try {
+    const token = localStorage.getItem(`admissionToken:${id}`);
+    return token ? { "x-admission-token": token } : {};
+  } catch {
+    return {};
+  }
+};
+
 const ACCEPTED_FILES =
   ".jpg,.jpeg,.png,.webp,.gif,.pdf,image/jpeg,image/png,image/webp,image/gif,application/pdf";
 
@@ -63,8 +73,8 @@ export default function AdmissionStatus() {
     setError("");
     try {
       const [statusResponse, requestResponse] = await Promise.all([
-        api.get(`/admissions/${id}/status`),
-        api.get(`/admissions/${id}/information-requests`),
+        api.get(`/admissions/${id}/status`, { headers: applicantHeaders(id) }),
+        api.get(`/admissions/${id}/information-requests`, { headers: applicantHeaders(id) }),
       ]);
       setAdmission(unwrapAdmission(statusResponse));
       setRequests(unwrapList(requestResponse.data));
@@ -120,6 +130,7 @@ export default function AdmissionStatus() {
           ...(response ? { response } : {}),
           ...(document ? { document } : {}),
         },
+        { headers: applicantHeaders(id) },
       );
       toast.success("Your response has been sent for review.");
       setResponses((current) => ({ ...current, [request.id]: "" }));
@@ -148,13 +159,15 @@ export default function AdmissionStatus() {
       <main className="mx-auto max-w-3xl p-6">
         <h1 className="mb-3 text-2xl font-bold">Application status</h1>
         <p role="alert" className="text-red-700">{error}</p>
-        <button
+        <LoadingButton
           type="button"
           onClick={refresh}
+          isLoading={loading}
+          loadingText="Retrying..."
           className="mt-4 rounded bg-blue-600 px-4 py-2 text-white"
         >
           Try again
-        </button>
+        </LoadingButton>
       </main>
     );
   }
@@ -180,13 +193,15 @@ export default function AdmissionStatus() {
           </>
         )}
         {error && <p role="alert" className="mt-3 text-red-700">{error}</p>}
-        <button
+        <LoadingButton
           type="button"
           onClick={refresh}
+          isLoading={loading}
+          loadingText="Refreshing..."
           className="mt-4 rounded border border-blue-600 px-4 py-2 text-blue-700"
         >
           Refresh status
-        </button>
+        </LoadingButton>
       </section>
 
       <section className="rounded bg-white p-6 shadow">
@@ -260,14 +275,15 @@ export default function AdmissionStatus() {
                           </select>
                         </label>
                       )}
-                      <button
+                      <LoadingButton
                         type="button"
                         onClick={() => handleRespond(request)}
-                        disabled={submitting[request.id]}
+                        isLoading={submitting[request.id]}
+                        loadingText="Sending..."
                         className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
                       >
-                        {submitting[request.id] ? "Sending..." : "Send response"}
-                      </button>
+                        Send response
+                      </LoadingButton>
                     </div>
                   )}
                 </article>

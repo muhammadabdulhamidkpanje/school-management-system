@@ -76,7 +76,10 @@ export const updateCourse = async (
 };
 
 export const deleteCourse = async (id: string, actorId: string, ipAddress?: string) => {
-  await getCourse(id);
+  const course = await getCourse(id);
+  if (course._count.courseOfferings > 0) {
+    throw new BadRequestError('Cannot delete a course with course offerings');
+  }
   await CourseRepo.deleteCourse(id);
   await CourseRepo.createAuditLog({
     action: 'COURSE_DELETED', userId: actorId, recordId: id,

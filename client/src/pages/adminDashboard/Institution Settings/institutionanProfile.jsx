@@ -9,6 +9,7 @@ import { institutionProfileKeys } from "../../../lib/queryKeys";
 import * as academicApi from "../../../features/academic/academicApi";
 import Input from "../../../components/inputs/input";
 import PrimaryButton from "../../../components/button/button";
+import LoadingButton from "../../../components/button/loadingButton";
 import Headings from "../../../UI/headings";
 
 export default function InstitutionProfile() {
@@ -75,13 +76,15 @@ export default function InstitutionProfile() {
     return (
       <div className="p-4 text-red-700">
         <p>{getErrorMessage(profileQuery.error)}</p>
-        <button
+        <LoadingButton
           type="button"
           className="mt-2 underline"
           onClick={() => profileQuery.refetch()}
+          isLoading={profileQuery.isFetching}
+          loadingText="Retrying..."
         >
           Try again
-        </button>
+        </LoadingButton>
       </div>
     );
   }
@@ -153,10 +156,11 @@ export default function InstitutionProfile() {
         </label>
         <PrimaryButton
           type="submit"
-          disabled={saveMutation.isPending}
+          isLoading={saveMutation.isPending}
+          loadingText="Saving..."
           className="w-full"
         >
-          {saveMutation.isPending ? "Saving..." : "Save institution profile"}
+          Save institution profile
         </PrimaryButton>
       </form>
     </section>

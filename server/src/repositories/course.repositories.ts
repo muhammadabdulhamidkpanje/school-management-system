@@ -3,6 +3,7 @@ import type { Prisma } from '../generated/prisma/index.js';
 
 const courseInclude = {
   department: true,
+  _count: { select: { courseOfferings: true } },
 } satisfies Prisma.CourseInclude;
 
 export const listCourses = (skip: number, take: number, search?: string, departmentId?: string) =>

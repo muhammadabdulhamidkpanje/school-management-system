@@ -47,6 +47,14 @@ export const get = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(res, admission, 'Admission fetched');
 });
 
+export const classroomsForAdmission = asyncHandler(async (req: Request, res: Response) => {
+  sendSuccess(
+    res,
+    await AdmissionService.listAdmissionClassroomsForAdmin(admissionId(req)),
+    'Available classes for admission fetched',
+  );
+});
+
 export const status = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(
     res,

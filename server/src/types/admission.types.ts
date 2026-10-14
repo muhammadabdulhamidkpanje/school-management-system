@@ -19,6 +19,7 @@ export interface AdmissionSubmissionInput {
   middleName?: string;
   lastName: string;
   email: string;
+  phone: string;
   dateOfBirth: string;
   gender: string;
   nationality: string;

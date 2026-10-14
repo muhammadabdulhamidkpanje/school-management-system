@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Navigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { Eye, EyeOff } from "lucide-react";
+import LoadingButton from "../../components/button/loadingButton";
 
 import { authLogin } from "./authSlice";
 import { login as loginRequest } from "./authApi";
@@ -214,17 +215,18 @@ export default function Login() {
           </div>
 
           {/* Submit Button */}
-          <button
+          <LoadingButton
             type="submit"
-            disabled={isSubmitting}
+            isLoading={isSubmitting}
+            loadingText="Logging in..."
             className={`w-full rounded-md px-4 py-2 text-white transition duration-200 ${
               isSubmitting
                 ? "cursor-not-allowed bg-blue-300"
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
-            {isSubmitting ? "Logging in..." : "Login"}
-          </button>
+            Login
+          </LoadingButton>
 
           {/* Sign Up */}
           <p className="text-sm text-gray-600">

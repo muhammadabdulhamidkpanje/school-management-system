@@ -36,7 +36,6 @@ export default function DepartmentFormBody({ department = null, onDone, onCancel
   const createDepartment = useCreateDepartment();
   const updateDepartment = useUpdateDepartment();
   const isSaving = createDepartment.isPending || updateDepartment.isPending;
-  const blocked = faculties.isLoading || faculties.isError;
 
   // The <select> needs its <option>s to exist before it can show the saved
   // facultyId, so re-sync once the faculty list finishes loading.
@@ -84,7 +83,7 @@ export default function DepartmentFormBody({ department = null, onDone, onCancel
         <p className="text-red-600">
           {getErrorMessage(faculties.error, "Couldn't load faculties.")}
         </p>
-        <PrimaryButton variant="secondary" onClick={() => faculties.refetch()}>
+        <PrimaryButton variant="secondary" onClick={() => faculties.refetch()} isLoading={faculties.isFetching} loadingText="Retrying...">
           Try again
         </PrimaryButton>
       </div>
@@ -133,8 +132,12 @@ export default function DepartmentFormBody({ department = null, onDone, onCancel
             Cancel
           </PrimaryButton>
         )}
-        <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? "Saving…" : isEdit ? "Save changes" : "Add department"}
+        <PrimaryButton
+          type="submit"
+          isLoading={isSaving}
+          loadingText="Saving…"
+        >
+          {isEdit ? "Save changes" : "Add department"}
         </PrimaryButton>
       </div>
     </form>

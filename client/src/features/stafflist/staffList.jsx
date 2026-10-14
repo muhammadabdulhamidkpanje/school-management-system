@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import Dialog from "../../components/dialog/dialog";
 import PrimaryButton from "../../components/button/button";
+import LoadingButton from "../../components/button/loadingButton";
 import Table from "../../components/table/table";
 import Pagination from "../../components/pagination/pagination";
 import { getErrorMessage } from "../../lib/apiError";
@@ -19,6 +20,7 @@ export default function StaffList() {
   const [activeFilter, setActiveFilter] = React.useState("");
   const [selectedId, setSelectedId] = React.useState(null);
   const [editing, setEditing] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
   const fileInputRef = React.useRef(null);
   const params = {
     page,
@@ -54,6 +56,7 @@ export default function StaffList() {
   };
 
   async function downloadCsv() {
+    setExporting(true);
     try {
       const blob = await staffApi.exportStaff();
       const url = URL.createObjectURL(blob);
@@ -66,6 +69,8 @@ export default function StaffList() {
       URL.revokeObjectURL(url);
     } catch (error) {
       toast.error(getErrorMessage(error, "Unable to export staff records."));
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -104,14 +109,15 @@ export default function StaffList() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
+          <LoadingButton
             type="button"
             className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"
             onClick={() => fileInputRef.current?.click()}
-            disabled={mutations.importCsv.isPending}
+            isLoading={mutations.importCsv.isPending}
+            loadingText="Importing..."
           >
-            {mutations.importCsv.isPending ? "Importing..." : "Import CSV"}
-          </button>
+            Import CSV
+          </LoadingButton>
           <input
             ref={fileInputRef}
             type="file"
@@ -119,13 +125,15 @@ export default function StaffList() {
             className="hidden"
             onChange={importFile}
           />
-          <button
+          <LoadingButton
             type="button"
             className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
             onClick={downloadCsv}
+            isLoading={exporting}
+            loadingText="Exporting..."
           >
             Export CSV
-          </button>
+          </LoadingButton>
         </div>
       </div>
 
@@ -212,28 +220,32 @@ export default function StaffList() {
                   >
                     Edit
                   </button>
-                  <button
+                  <LoadingButton
                     type="button"
                     className="text-amber-700 hover:underline disabled:text-gray-400"
                     disabled={mutations.update.isPending}
+                    isLoading={mutations.update.isPending && mutations.update.variables?.id === member.id}
+                    loadingText={member.isActive ? "Deactivating..." : "Activating..."}
                     onClick={() => mutations.update.mutate({
                       id: member.id,
                       isActive: !member.isActive,
                     })}
                   >
                     {member.isActive ? "Deactivate" : "Activate"}
-                  </button>
-                  <button
+                  </LoadingButton>
+                  <LoadingButton
                     type="button"
                     className="text-red-700 hover:underline disabled:text-gray-400"
                     disabled={hasCourseAssignments || mutations.remove.isPending}
+                    isLoading={mutations.remove.isPending && mutations.remove.variables === member.id}
+                    loadingText="Deleting..."
                     title={hasCourseAssignments
                       ? "Staff assigned to course offerings cannot be deleted"
                       : undefined}
                     onClick={() => removeStaff(member)}
                   >
                     Delete
-                  </button>
+                  </LoadingButton>
                 </td>
               </>
             );
@@ -254,9 +266,9 @@ export default function StaffList() {
         {detailQuery.isError && (
           <div role="alert" className="text-red-700">
             <p>{getErrorMessage(detailQuery.error, "Couldn't load staff details.")}</p>
-            <button type="button" className="mt-2 underline" onClick={() => detailQuery.refetch()}>
+            <LoadingButton type="button" className="mt-2 underline" onClick={() => detailQuery.refetch()} isLoading={detailQuery.isFetching} loadingText="Retrying...">
               Try again
-            </button>
+            </LoadingButton>
           </div>
         )}
         {selectedStaff && editing && (
@@ -354,8 +366,8 @@ function StaffEditForm({ staff, isSaving, onCancel, onSubmit }) {
         Active staff member
       </label>
       <div className="flex gap-2 sm:col-span-2">
-        <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save changes"}
+        <PrimaryButton type="submit" isLoading={isSaving} loadingText="Saving...">
+          Save changes
         </PrimaryButton>
         <button type="button" className="rounded border px-4 py-2" onClick={onCancel} disabled={isSaving}>
           Cancel

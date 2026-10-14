@@ -60,6 +60,15 @@ The staff-management page uses these administrator endpoints (all require the ma
 - `DELETE /staff/:id` deletes a staff record unless it still has course offerings; qualification documents are removed from managed storage.
 - `GET /staff/export.csv` downloads a CSV export. `POST /staff/import` accepts JSON `{ "csv": "<CSV text>" }` with `employeeNo`, `firstName`, and `lastName` columns required. CSV import creates basic staff records without login accounts.
 
+## Assign staff to course offerings
+
+Course instructors are assigned to a subject offering for a specific classroom and semester; the catalog `Course` record itself has no single instructor. These routes require an authenticated administrator with `courses:read` or `courses:write`:
+
+- `GET /course-offerings?page=1&limit=20` lists offerings with their course (or a legacy subject), classroom, semester/session, and current instructor.
+- `POST /course-offerings` accepts `{ "courseId": "<course-id>", "classroomId": "<classroom-id>", "semesterId": "<semester-id>" }` to add a catalog course to a class and semester. Duplicate placements are rejected.
+- `PUT /course-offerings/:id/teacher` accepts `{ "teacherId": "<staff-id>" }` to assign an active staff member, or `{ "teacherId": null }` to unassign them. The staff member must be active.
+- Staff options come from `GET /staff?page=1&limit=100&isActive=true`, which requires `staff:read`.
+
 Example `payload`:
 
 ```json

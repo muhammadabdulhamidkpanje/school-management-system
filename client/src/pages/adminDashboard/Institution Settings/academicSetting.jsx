@@ -7,11 +7,10 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import PrimaryButton from "../../../components/button/button";
+import LoadingButton from "../../../components/button/loadingButton";
 import Input from "../../../components/inputs/input";
 import Select from "../../../components/inputs/select";
 import Headings from "../../../UI/headings";
-import VerticalButton from "../../../UI/verticalButton";
 import HorizontalButton from "../../../UI/horizontalButton";
 import Table from "../../../components/table/table";
 import { getErrorMessage } from "../../../lib/apiError";
@@ -34,26 +33,27 @@ export default function AcademicSettings() {
   const [tab, setTab] = React.useState(1);
 
   return (
-    <div className="flex flex-wrap">
+    <section className="w-full space-y-3">
       <Headings className="w-full text-xl font-semibold">
         Academic Settings
       </Headings>
-      <div className="flex w-full flex-wrap justify-between gap-2">
-        <VerticalButton
+      <div className="flex w-full flex-col gap-3 lg:flex-row">
+        <HorizontalButton
           data={academicButtons}
-          className="w-[24%]"
           tab={tab}
           setTab={setTab}
           onClick={setTab}
+          nowrap
+          verticalOnLarge
         />
-        <div className="w-full shadow sm:w-[73%]">
+        <div className="w-full rounded-lg border border-gray-200 bg-white shadow-sm lg:flex-1">
           {tab === 1 && <Sessions />}
           {tab === 2 && <Semesters />}
           {tab === 3 && <GradingSystemsSettings />}
           {tab === 4 && <AcademicCalendarsSettings />}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -95,26 +95,28 @@ function Sessions() {
 
   return (
     <section className="w-full p-4">
-      <Headings className="text-sm font-semibold">Academic Sessions</Headings>
-      <HorizontalButton
-        tab={tab}
-        setTab={(nextTab) => {
-          setEditing(null);
-          setTab(nextTab);
-        }}
-        onClick={setTab}
-        data={[
-          { label: "Sessions", value: 1 },
-          { label: "Add session", value: 2 },
-        ]}
-        className="w-full"
-      />
+      {tab === 1 && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <Headings className="text-sm font-semibold">Academic Sessions</Headings>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setTab(2);
+            }}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Add session
+          </button>
+        </div>
+      )}
       <div className="p-4">
         {tab === 1 ? (
           <Table
             data={sessionsQuery.data?.sessions ?? []}
             isLoading={sessionsQuery.isLoading}
             isError={sessionsQuery.isError}
+            isRetrying={sessionsQuery.isFetching}
             errorMessage={getErrorMessage(sessionsQuery.error)}
             onRetry={sessionsQuery.refetch}
             emptyMessage="No academic sessions have been created."
@@ -135,6 +137,8 @@ function Sessions() {
                   (session._count?.semesters ?? 0) +
                   (session._count?.admissions ?? 0) +
                   (session._count?.enrollments ?? 0);
+                const isDeleting =
+                  deleteMutation.isPending && deleteMutation.variables === session.id;
                 return (
                   <>
                     <td className="px-3 py-2">{session.name}</td>
@@ -154,9 +158,11 @@ function Sessions() {
                       >
                         Edit
                       </button>
-                      <button
+                      <LoadingButton
                         type="button"
                         className="text-red-700 underline disabled:text-gray-400"
+                        isLoading={isDeleting}
+                        loadingText="Deleting..."
                         disabled={relatedCount > 0 || deleteMutation.isPending}
                         title={
                           relatedCount > 0
@@ -174,7 +180,7 @@ function Sessions() {
                         }}
                       >
                         Delete
-                      </button>
+                      </LoadingButton>
                     </td>
                   </>
                 );
@@ -255,18 +261,21 @@ function SessionForm({ session, isSaving, onCancel, onSubmit }) {
         Set as current session
       </label>
       <div className="flex gap-2">
-        <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : session ? "Save changes" : "Create session"}
-        </PrimaryButton>
-        {session && (
-          <button
-            type="button"
-            className="rounded border px-4 py-2"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-        )}
+        <LoadingButton
+          type="submit"
+          isLoading={isSaving}
+          loadingText="Saving..."
+          className="bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 lg:px-4"
+        >
+          {session ? "Save changes" : "Create session"}
+        </LoadingButton>
+        <button
+          type="button"
+          className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );
@@ -319,20 +328,21 @@ function Semesters() {
 
   return (
     <section className="w-full p-4">
-      <Headings className="text-sm font-semibold">Semesters</Headings>
-      <HorizontalButton
-        tab={tab}
-        setTab={(nextTab) => {
-          setEditing(null);
-          setTab(nextTab);
-        }}
-        onClick={setTab}
-        data={[
-          { label: "Semesters", value: 1 },
-          { label: "Add semester", value: 2 },
-        ]}
-        className="w-full"
-      />
+      {tab === 1 && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <Headings className="text-sm font-semibold">Semesters</Headings>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setTab(2);
+            }}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Add semester
+          </button>
+        </div>
+      )}
       <div className="p-4">
         {tab === 1 ? (
           <>
@@ -349,6 +359,7 @@ function Semesters() {
               data={semestersQuery.data?.semesters ?? []}
               isLoading={sessionsQuery.isLoading || semestersQuery.isLoading}
               isError={sessionsQuery.isError || semestersQuery.isError}
+              isRetrying={sessionsQuery.isFetching || semestersQuery.isFetching}
               errorMessage={getErrorMessage(
                 sessionsQuery.error ?? semestersQuery.error,
               )}
@@ -373,6 +384,8 @@ function Semesters() {
                   const relatedCount =
                     (semester._count?.enrollments ?? 0) +
                     (semester._count?.courseOfferings ?? 0);
+                  const isDeleting =
+                    deleteMutation.isPending && deleteMutation.variables === semester.id;
                   return (
                     <>
                       <td className="px-3 py-2">{semester.name}</td>
@@ -399,9 +412,11 @@ function Semesters() {
                         >
                           Edit
                         </button>
-                        <button
+                        <LoadingButton
                           type="button"
                           className="text-red-700 underline disabled:text-gray-400"
+                          isLoading={isDeleting}
+                          loadingText="Deleting..."
                           disabled={relatedCount > 0 || deleteMutation.isPending}
                           title={
                             relatedCount > 0
@@ -419,7 +434,7 @@ function Semesters() {
                           }}
                         >
                           Delete
-                        </button>
+                        </LoadingButton>
                       </td>
                     </>
                   );
@@ -521,18 +536,22 @@ function SemesterForm({
         Set as current semester
       </label>
       <div className="flex gap-2">
-        <PrimaryButton type="submit" disabled={isSaving || sessions.length === 0}>
-          {isSaving ? "Saving..." : semester ? "Save changes" : "Create semester"}
-        </PrimaryButton>
-        {semester && (
-          <button
-            type="button"
-            className="rounded border px-4 py-2"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-        )}
+        <LoadingButton
+          type="submit"
+          isLoading={isSaving}
+          loadingText="Saving..."
+          disabled={sessions.length === 0}
+          className="bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 lg:px-4"
+        >
+          {semester ? "Save changes" : "Create semester"}
+        </LoadingButton>
+        <button
+          type="button"
+          className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
       </div>
       {sessions.length === 0 && !isLoadingSessions && (
         <p className="mt-2 text-sm text-amber-800">
@@ -599,42 +618,50 @@ function GradingSystemsSettings() {
           data={query.data ?? []}
           isLoading={query.isLoading}
           isError={query.isError}
+          isRetrying={query.isFetching}
           errorMessage={getErrorMessage(query.error)}
           onRetry={query.refetch}
           emptyMessage="No grading systems have been created."
         >
           <Table.Header columns={["Name", "Grade ranges", "Actions"]} />
           <Table.Body
-            renderRow={(system) => (
-              <>
-                <td className="px-3 py-2">{system.name}</td>
-                <td className="px-3 py-2">
-                  {system.grades
-                    .map((grade) => `${grade.grade}: ${grade.minScore}-${grade.maxScore}`)
-                    .join(", ")}
-                </td>
-                <td className="space-x-2 px-3 py-2">
-                  <button
-                    type="button"
-                    className="text-blue-700 underline"
-                    onClick={() => setEditing(system)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="text-red-700 underline"
-                    onClick={() => {
-                      if (window.confirm(`Delete grading system "${system.name}"?`)) {
-                        deleteMutation.mutate(system.id);
-                      }
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </>
-            )}
+            renderRow={(system) => {
+              const isDeleting =
+                deleteMutation.isPending && deleteMutation.variables === system.id;
+              return (
+                <>
+                  <td className="px-3 py-2">{system.name}</td>
+                  <td className="px-3 py-2">
+                    {system.grades
+                      .map((grade) => `${grade.grade}: ${grade.minScore}-${grade.maxScore}`)
+                      .join(", ")}
+                  </td>
+                  <td className="space-x-2 px-3 py-2">
+                    <button
+                      type="button"
+                      className="text-blue-700 underline"
+                      onClick={() => setEditing(system)}
+                    >
+                      Edit
+                    </button>
+                    <LoadingButton
+                      type="button"
+                      className="text-red-700 underline"
+                      isLoading={isDeleting}
+                      loadingText="Deleting..."
+                      disabled={deleteMutation.isPending}
+                      onClick={() => {
+                        if (window.confirm(`Delete grading system "${system.name}"?`)) {
+                          deleteMutation.mutate(system.id);
+                        }
+                      }}
+                    >
+                      Delete
+                    </LoadingButton>
+                  </td>
+                </>
+              );
+            }}
           />
         </Table>
       </div>
@@ -709,9 +736,14 @@ function GradingSystemForm({ gradingSystem, isSaving, onCancel, onSubmit }) {
         One range per line: grade,min score,max score,remark. Scores are from 0 to 100.
       </p>
       <div className="flex gap-2">
-        <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : gradingSystem ? "Save changes" : "Create grading system"}
-        </PrimaryButton>
+        <LoadingButton
+          type="submit"
+          isLoading={isSaving}
+          loadingText="Saving..."
+          className="bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 lg:px-4"
+        >
+          {gradingSystem ? "Save changes" : "Create grading system"}
+        </LoadingButton>
         {gradingSystem && (
           <button type="button" className="rounded border px-4 py-2" onClick={onCancel}>
             Cancel
@@ -781,6 +813,7 @@ function AcademicCalendarsSettings() {
           data={events}
           isLoading={query.isLoading || sessionsQuery.isLoading}
           isError={query.isError || sessionsQuery.isError}
+          isRetrying={query.isFetching || sessionsQuery.isFetching}
           errorMessage={getErrorMessage(query.error ?? sessionsQuery.error)}
           onRetry={() => {
             query.refetch();
@@ -790,34 +823,41 @@ function AcademicCalendarsSettings() {
         >
           <Table.Header columns={["Event", "Session", "Start date", "End date", "Actions"]} />
           <Table.Body
-            renderRow={(event) => (
-              <>
-                <td className="px-3 py-2">{event.title}</td>
-                <td className="px-3 py-2">{event.session?.name ?? "All sessions"}</td>
-                <td className="px-3 py-2">{formatDate(event.startDate)}</td>
-                <td className="px-3 py-2">{formatDate(event.endDate)}</td>
-                <td className="space-x-2 px-3 py-2">
-                  <button
-                    type="button"
-                    className="text-blue-700 underline"
-                    onClick={() => setEditing(event)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="text-red-700 underline"
-                    onClick={() => {
-                      if (window.confirm(`Delete calendar event "${event.title}"?`)) {
-                        deleteMutation.mutate(event.id);
-                      }
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </>
-            )}
+            renderRow={(event) => {
+              const isDeleting =
+                deleteMutation.isPending && deleteMutation.variables === event.id;
+              return (
+                <>
+                  <td className="px-3 py-2">{event.title}</td>
+                  <td className="px-3 py-2">{event.session?.name ?? "All sessions"}</td>
+                  <td className="px-3 py-2">{formatDate(event.startDate)}</td>
+                  <td className="px-3 py-2">{formatDate(event.endDate)}</td>
+                  <td className="space-x-2 px-3 py-2">
+                    <button
+                      type="button"
+                      className="text-blue-700 underline"
+                      onClick={() => setEditing(event)}
+                    >
+                      Edit
+                    </button>
+                    <LoadingButton
+                      type="button"
+                      className="text-red-700 underline"
+                      isLoading={isDeleting}
+                      loadingText="Deleting..."
+                      disabled={deleteMutation.isPending}
+                      onClick={() => {
+                        if (window.confirm(`Delete calendar event "${event.title}"?`)) {
+                          deleteMutation.mutate(event.id);
+                        }
+                      }}
+                    >
+                      Delete
+                    </LoadingButton>
+                  </td>
+                </>
+              );
+            }}
           />
         </Table>
       </div>
@@ -883,9 +923,14 @@ function CalendarEventForm({ event, sessions, isSaving, onCancel, onSubmit }) {
         />
       </div>
       <div className="flex gap-2">
-        <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : event ? "Save changes" : "Add calendar event"}
-        </PrimaryButton>
+        <LoadingButton
+          type="submit"
+          isLoading={isSaving}
+          loadingText="Saving..."
+          className="bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 lg:px-4"
+        >
+          {event ? "Save changes" : "Add calendar event"}
+        </LoadingButton>
         {event && (
           <button type="button" className="rounded border px-4 py-2" onClick={onCancel}>
             Cancel

@@ -1,4 +1,5 @@
 import React, { createContext, useContext } from "react";
+import LoadingButton from "../button/loadingButton";
 
 const TableContext = createContext({ data: [], hasRows: false });
 
@@ -20,11 +21,23 @@ export default function Table({
   isError = false,
   errorMessage = "Something went wrong while loading this data.",
   onRetry,
+  isRetrying = false,
   emptyMessage = "Nothing here yet.",
   className = "",
 }) {
+  const [retrying, setRetrying] = React.useState(false);
   const rows = data ?? [];
   const hasRows = !isLoading && !isError && rows.length > 0;
+  const retryPending = isRetrying || retrying;
+
+  async function retry() {
+    setRetrying(true);
+    try {
+      await onRetry();
+    } finally {
+      setRetrying(false);
+    }
+  }
 
   return (
     <TableContext.Provider value={{ data: rows, hasRows }}>
@@ -43,13 +56,15 @@ export default function Table({
           <StateMessage
             action={
               onRetry && (
-                <button
+                <LoadingButton
                   type="button"
-                  onClick={() => onRetry()}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                  isLoading={retryPending}
+                  loadingText="Retrying..."
+                  onClick={retry}
+                  className="border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Try again
-                </button>
+                </LoadingButton>
               )
             }
           >

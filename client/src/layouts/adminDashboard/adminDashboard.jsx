@@ -49,7 +49,7 @@ import {
       group: "Academics",
     },
     {
-      path: "/Course-Management",
+      path: "/course-management",
       name: "Course Management",
       icon: <Book size={26} />,
       group: "Academics",
@@ -88,4 +88,3 @@ export default function AdminDashboard() {
       </div>
     );
 }
-

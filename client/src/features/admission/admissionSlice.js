@@ -7,6 +7,7 @@ const createInitialState = () => ({
   middleName: "",
   lastName: "",
   email: "",
+  phone: "",
   dateOfBirth: "",
   gender: "",
   nationality: "",
@@ -34,7 +35,15 @@ export const submitAdmission = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const { data } = await api.post("/admissions", payload);
-      return data.data;
+      const submission = data.data;
+      if (submission?.id && submission?.applicantToken) {
+        try {
+          localStorage.setItem(`admissionToken:${submission.id}`, submission.applicantToken);
+        } catch {
+          // storage unavailable; applicant can still see the success screen
+        }
+      }
+      return submission;
     } catch (error) {
       return rejectWithValue({
         message: getErrorMessage(error),

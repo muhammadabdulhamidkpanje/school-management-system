@@ -40,7 +40,7 @@ export default function ResultsSection() {
       setSessionsLoaded(false);
       setOptionsError("");
       try {
-        const { data } = await api.get("/api/v1/admissions/options/sessions");
+        const { data } = await api.get("/admissions/options/sessions");
         if (!Array.isArray(data?.data)) {
           throw new Error("The admission sessions response was not valid.");
         }
@@ -97,7 +97,7 @@ export default function ResultsSection() {
       setLoadingClasses(true);
       setOptionsError("");
       try {
-        const { data } = await api.get("/api/v1/admissions/options/classes", {
+        const { data } = await api.get("/admissions/options/classes", {
           params: { academicSessionId },
         });
         if (!Array.isArray(data?.data)) {

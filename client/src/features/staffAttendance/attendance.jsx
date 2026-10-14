@@ -10,12 +10,14 @@ const staffList = [
 
 export default function StaffAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAttendanceSubmit = async (records) => {
     const today = new Date().toISOString().split("T")[0];
     const updated = records.map((r) => ({ ...r, date: today }));
     setAttendanceRecords((prev) => [...prev, ...updated]);
 
+    setIsSubmitting(true);
     try {
       await fetch("/api/staff/attendance", {
         method: "POST",
@@ -24,13 +26,15 @@ export default function StaffAttendance() {
       });
     } catch (err) {
       console.error("Error submitting attendance:", err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="mx-auto max-w-4xl p-4">
       <h2 className="mb-4 text-xl font-bold">Staff Attendance</h2>
-      <AttendanceForm staffList={staffList} onSubmit={handleAttendanceSubmit} />
+      <AttendanceForm staffList={staffList} onSubmit={handleAttendanceSubmit} isSubmitting={isSubmitting} />
       <div className="mt-6">
         <h3 className="mb-2 text-lg font-semibold">Attendance Records</h3>
         <AttendanceTable attendanceData={attendanceRecords} />
@@ -39,7 +43,7 @@ export default function StaffAttendance() {
   );
 }
 
-function AttendanceForm({ staffList, onSubmit }) {
+function AttendanceForm({ staffList, onSubmit, isSubmitting }) {
   const [attendance, setAttendance] = useState(
     staffList.map((staff) => ({
       staffId: staff.id,
@@ -106,8 +110,8 @@ function AttendanceForm({ staffList, onSubmit }) {
           />
         </div>
       ))}
-      <PrimaryButton type="submit" className="mt-4">
-        Submit Attendance
+      <PrimaryButton type="submit" className="mt-4" isLoading={isSubmitting} loadingText="Submitting...">
+        Submit attendance
       </PrimaryButton>
     </form>
   );
@@ -123,7 +127,7 @@ function AttendanceTable({ attendanceData }) {
         columns={["Name", "Date", "Status", "Check-In", "Check-Out"]}
       />
       <Table.Body
-        renderRow={(row, index) => (
+        renderRow={(row) => (
           <>
             <td className="p-2">{row.name}</td>
             <td className="p-2">{row.date}</td>

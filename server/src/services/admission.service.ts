@@ -6,6 +6,7 @@ import type {
 } from '../types/admission.types.js';
 import { getMissingAdmissionSubjects } from '../utils/admission-results.js';
 import { verifyAdmissionUploadClaim } from '../utils/admission-upload-claim.js';
+import { hashPassword } from '../utils/hash.js';
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/errors.js';
 import * as UploadService from './upload.service.js';
 
@@ -86,7 +87,8 @@ export const submitAdmission = async (input: AdmissionSubmissionInput) => {
       applicantFirstName: input.firstName,
       ...(input.middleName !== undefined && { applicantMiddleName: input.middleName }),
       applicantLastName: input.lastName,
-      email: input.email,
+      email: input.email.toLowerCase(),
+      applicantPhone: input.phone,
       dateOfBirth: new Date(`${input.dateOfBirth}T00:00:00.000Z`),
       gender: input.gender,
       nationality: input.nationality,
@@ -130,6 +132,12 @@ export const listAdmissions = async (page: number, limit: number, status?: strin
 };
 
 export const getAdmissionForAdmin = (id: string) => requireAdmission(id);
+
+export const listAdmissionClassroomsForAdmin = async (id: string) => {
+  const admission = await requireAdmission(id);
+  if (!admission.sessionId) throw new BadRequestError('Admission is missing an academic session');
+  return AdmissionRepo.listPublicAdmissionClassrooms(admission.sessionId);
+};
 
 export const getAdmissionForApplicant = async (id: string, token?: string) => {
   await requireApplicantToken(id, token);
@@ -273,17 +281,36 @@ export const rejectAdmission = async (id: string, reason: string, actorId: strin
 export const enrollAdmission = async (id: string, actorId: string, ipAddress?: string) => {
   const admission = await requireAdmission(id);
   if (admission.status !== 'APPROVED') throw new ConflictError('Only approved applications can be enrolled');
-  if (!admission.sessionId || !admission.approvedClassId || !admission.dateOfBirth || !admission.gender) {
+  if (!admission.sessionId || !admission.approvedClassId || !admission.dateOfBirth || !admission.gender || !admission.email || !admission.applicantPhone) {
     throw new BadRequestError('Approved admission is missing required enrollment details');
   }
+  const email = admission.email.toLowerCase();
+  if (await AdmissionRepo.findUserByEmail(email)) {
+    throw new ConflictError('A user account already exists for this applicant email. Resolve the duplicate account before enrolling.');
+  }
+  const role = await AdmissionRepo.findRoleByName('student');
+  if (!role) throw new NotFoundError('Student role');
+
   if (!await AdmissionRepo.findClassroomForSession(admission.approvedClassId, admission.sessionId)) {
     throw new BadRequestError('Final class is no longer active or available for this academic session');
   }
 
   const year = new Date().getUTCFullYear();
   const studentNumber = `STU-${year}-${randomBytes(8).toString('hex').toUpperCase()}`;
+  const initialPassword = admission.applicantPhone.trim();
+  const passwordHash = await hashPassword(initialPassword);
   const result = requireSuccessfulTransition(await AdmissionRepo.enrollAdmission({
     id,
+    user: {
+      email,
+      passwordHash,
+      roleId: role.id,
+      firstName: admission.applicantFirstName,
+      ...(admission.applicantMiddleName !== null && { middleName: admission.applicantMiddleName }),
+      lastName: admission.applicantLastName,
+      phone: admission.applicantPhone,
+      dateOfBirth: admission.dateOfBirth,
+    },
     student: {
       admissionNo: studentNumber,
       firstName: admission.applicantFirstName,
@@ -298,5 +325,8 @@ export const enrollAdmission = async (id: string, actorId: string, ipAddress?: s
     changedBy: actorId,
   }), 'Application changed before enrollment could be completed');
   await audit('ADMISSION_ENROLLED', id, actorId, ipAddress);
-  return result;
+  return {
+    ...result,
+    credentials: { email, initialPassword },
+  };
 };

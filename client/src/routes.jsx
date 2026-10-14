@@ -78,7 +78,7 @@ const AppRoutes = () => {
               element={<TimeTableAndSchedules />}
             />
             <Route
-              path="/admin-dashboard/course-Management"
+              path="/admin-dashboard/course-management"
               element={<CourseManagement />}
             />
             <Route

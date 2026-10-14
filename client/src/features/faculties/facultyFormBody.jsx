@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -91,8 +90,12 @@ export default function FacultyFormBody({ faculty = null, onDone, onCancel }) {
             Cancel
           </PrimaryButton>
         )}
-        <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? "Saving…" : isEdit ? "Save changes" : "Add faculty"}
+        <PrimaryButton
+          type="submit"
+          isLoading={isSaving}
+          loadingText="Saving…"
+        >
+          {isEdit ? "Save changes" : "Add faculty"}
         </PrimaryButton>
       </div>
     </form>
